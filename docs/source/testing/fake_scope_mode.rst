@@ -21,9 +21,17 @@ To download:
 
 **Podman/Docker Installation**
 
-    Mount the location of smartscope_testfiles to /mnt/fake_scope/.
+    In the smatscope volume section of the :code:`docker-compose.yml`:
 
-**Anaconda**
+    Mount the location of smartscope_testfiles to :code:`/mnt/testfiles/`.
+    
+    Create a directory that will act as a "fake scope directory" and mount to :code:`/mnt/fake_scope/`. This could be anywhere on the system. Make sure it's owned by user id 1000 or with 777 permissions.
 
-    Change the TEST_FILES enviroment variable to the smartscope_testfiles location.
+    .. code:: yaml
 
+        services:
+          smartscope:
+            volumes:
+              - /yourpath/to/smartscope_testfiles/:/mnt/testfiles/
+              - /path/to/fake_scope/:/mnt/fake_scope
+        
