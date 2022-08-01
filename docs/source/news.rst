@@ -1,6 +1,14 @@
 Latest News
 ###########
 
+2022-07-31:
+
+   The paper for SmartScope is accepted and pending publication. The code will be made available during the next week.
+
+2022-07-21:
+
+   v0.7 is now live. It contains a overhaul of the preprocessing pipeline for additional stability and modularity.
+
 2022-06-29:
 
    v0.62 has been deployed as a result of our internal testing to improve stability. 

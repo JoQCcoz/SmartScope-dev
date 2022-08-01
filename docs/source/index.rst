@@ -12,6 +12,8 @@ The main purpose is to automate specimen screening, document the process, and pr
 The software bundles a database, the main imaging workflow and a web user-inteface for easy access. 
 To run Smartscope, simply fill the form about which grids to be screened, press start and wait for live results to come in.
 
+The source code can be found on `GitHub <https://github.com/NIEHS/SmartScope>`_.
+
 .. figure:: /_static/webui.png
    :width: 90%
    :align: center
