@@ -9,18 +9,18 @@ We aim at working closely with testers with their initial setup and obtain feedb
 
 If you would like to contribute to the codebase during the closed beta period, please email us for inquiries.
 
-If you need help with installation and setup, please join our Slack or email us `here<./contact.html>`_.
+If you need help with installation and setup, please join our Slack or email us `here <./contact.html>`_.
 
 Timeline
 ########
 Here is the expected timeline of SmartScope beta program and release:
 
 .. csv-table::
-   :header: "Phase", "Start", "End", "Source code"
+   :header: "Phase", "Start", "End", "Source code", "Status"
    :widths: 20, 20, 20, 20
 
-   "Closed beta", "2022-05-27", "2022-08-29", "Private"
-   "Open beta", "2022-08-01", "2022-09-30", "Public"
-   "Release", "2022-10-01", "*null*", "Public" 
+   "Closed beta", "2022-05-27", "2022-08-29", "Private", "Finished"
+   "Open beta", "2022-08-01", "2022-09-30", "Public", "Ongoing"
+   "Release", "2022-10-01", "*null*", "Public", "Pending"
 *Dates are subject to change*
 
