@@ -17,9 +17,9 @@ Here is the expected timeline of SmartScope beta program and release:
 
 .. csv-table::
    :header: "Phase", "Start", "End", "Source code", "Status"
-   :widths: 20, 20, 20, 20
+   :widths: 20, 20, 20, 20,20
 
-   "Closed beta", "2022-05-27", "2022-08-29", "Private", "Finished"
+   "Closed beta", "2022-05-27", "2022-07-29", "Private", "Finished"
    "Open beta", "2022-08-01", "2022-09-30", "Public", "Ongoing"
    "Release", "2022-10-01", "*null*", "Public", "Pending"
 *Dates are subject to change*
