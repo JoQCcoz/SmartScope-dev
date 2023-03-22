@@ -14,7 +14,6 @@ urlpatterns = [
     path('multishot/', views.MultiShotView.as_view(),name='setMultishot'),
     path('protocol/<grid_id>',views.ProtocolView.as_view(), name='protocol'),
     path('microscopes/status/', views.MicroscopeStatus.as_view(), name='microscopeStatus'),
-
 ]
 if settings.USE_MICROSCOPE:
     urlpatterns += [path('run/', RedirectView.as_view(url='setup/'), name='run'),

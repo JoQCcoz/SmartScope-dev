@@ -1,6 +1,8 @@
 
+from typing import Any, Dict
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
+from django import http
 import os
 import Smartscope
 
@@ -14,6 +16,18 @@ class MyLoginView(auth_views.LoginView):
         context = super().get_context_data(**kwargs)
         context.update({'version': Smartscope.__version__})
         return context
+    
+class UserManagement(TemplateView):
+    template_name = 'user_management.html'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        return super().get_context_data(**kwargs)
+    
+    def get(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
+        if request.user.is_staff:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+
 
 
 class ChangeLog(LoginRequiredMixin, TemplateView):
