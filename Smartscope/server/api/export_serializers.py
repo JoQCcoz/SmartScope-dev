@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
-from Smartscope.core import models
-from Smartscope.server.api.serializers import GridCollectionParamsSerializer, MicroscopeSerializer,DetectorSerializer
+from . import models
+from .serializers import GridCollectionParamsSerializer, MicroscopeSerializer,DetectorSerializer
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 import logging

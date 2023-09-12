@@ -7,7 +7,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 
-from Smartscope.core.models.grid import AutoloaderGrid
+from Smartscope.server.api.models.grid import AutoloaderGrid
 from Smartscope.lib.Datatypes.models import generate_unique_id
 
 import logging

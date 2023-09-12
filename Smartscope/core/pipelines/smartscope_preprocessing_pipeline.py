@@ -8,10 +8,10 @@ import logging
 from pathlib import Path
 
 from Smartscope.core.db_manipulations import websocket_update
-from Smartscope.core.models.grid import AutoloaderGrid
+from Smartscope.server.api.models.grid import AutoloaderGrid
 from Smartscope.lib.preprocessing_methods import get_CTFFIN4_data, \
     process_hm_from_average, process_hm_from_frames, processing_worker_wrapper
-from Smartscope.core.models.models_actions import update_fields
+from Smartscope.server.api.models.models_actions import update_fields
 
 from django.db import transaction
 

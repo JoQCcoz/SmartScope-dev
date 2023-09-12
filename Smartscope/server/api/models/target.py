@@ -1,9 +1,18 @@
 
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 import numpy as np
 
+from .base_model import *
 from Smartscope.core.settings.worker import PLUGINS_FACTORY
 
 
+class DisplayManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset()\
+            .prefetch_related('finders')\
+            .prefetch_related('classifiers')\
+            .prefetch_related('selectors')
 
 class Target(BaseModel):
     from .grid import AutoloaderGrid
@@ -73,8 +82,6 @@ class Target(BaseModel):
                 return False
         return True
 
-    def is_out_of_range(self) -> bool:
-        return not self.finders.first().is_position_within_stage_limits()
     # def css_color(self, display_type, method):
 
     #     if method is None:

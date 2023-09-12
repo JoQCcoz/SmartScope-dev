@@ -5,7 +5,7 @@ import cv2
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.query import prefetch_related_objects
 
-from Smartscope.core.models import Selector
+from Smartscope.server.api.models import Selector
 from Smartscope.lib.image.montage import Montage
 from Smartscope.core.settings.worker import PLUGINS_FACTORY
 from Smartscope.lib.image_manipulations import save_image, to_8bits, auto_contrast

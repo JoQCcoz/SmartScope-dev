@@ -5,11 +5,10 @@ from django.contrib import admin
 
 # from Smartscope.core.models.grid import AutoloaderGrid
 # from Smartscope.core.models.grid_collection_params import GridCollectionParams
-from Smartscope.core.models.detector import Detector
-from Smartscope.core.models.hole_type import HoleType
-from Smartscope.core.models.mesh import MeshSize, MeshMaterial
-from Smartscope.core.models.microscope import Microscope
-from Smartscope.core.models.custom_paths import CustomUserPath, CustomGroupPath
+from Smartscope.server.api.models.detector import Detector
+from Smartscope.server.api.models.hole_type import HoleType
+from Smartscope.server.api.models.mesh import MeshSize, MeshMaterial
+from Smartscope.server.api.models.microscope import Microscope
 # from Smartscope.core.models.screening_session import ScreeningSession
 # from Smartscope.core.models.target import Finder, Classifier
 

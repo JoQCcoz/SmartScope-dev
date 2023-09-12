@@ -1,9 +1,9 @@
 
 
-# from Smartscope.core.models import AutoloaderGrid,HoleModel, HighMagModel
-from Smartscope.core.models.grid import AutoloaderGrid
-from Smartscope.core.models.hole import HoleModel
-from Smartscope.core.models.high_mag import HighMagModel
+# from Smartscope.server.api.models import AutoloaderGrid,HoleModel, HighMagModel
+from Smartscope.server.api.models.grid import AutoloaderGrid
+from Smartscope.server.api.models.hole import HoleModel
+from Smartscope.server.api.models.high_mag import HighMagModel
 # from Smartscope.lib.multishot import load_multishot_from_file
 from .grid.run_hole import RunHole
 from .grid.grid_status import GridStatus

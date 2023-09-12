@@ -10,7 +10,7 @@ from django.conf import settings
 from .interfaces.tfsserialem_interface import TFSSerialemInterface
 from Smartscope.lib.preprocessing_methods import process_hm_from_frames
 from .grid.finders import find_targets
-from Smartscope.core.models import Microscope
+from Smartscope.server.api.models import Microscope
 
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def test_high_mag_frame_processing(
 
 def refine_atlas_pixel_size(grids: List[str]):
     logger.info('Running atlas pixel size refinement')
-    from Smartscope.core.models import AtlasModel
+    from Smartscope.server.api.models import AtlasModel
     grids = grids.split(',')
     instances = list(AtlasModel.objects.filter(grid_id__in=grids))
     grid_meshes = [instance.grid_id.meshSize.pitch for instance in instances]
@@ -61,7 +61,7 @@ def refine_atlas_pixel_size(grids: List[str]):
 
 
 def refine_square_pixel_size(grids: List[str]):
-    from Smartscope.core.models import SquareModel
+    from Smartscope.server.api.models import SquareModel
     logger.info('Running square pixel size refinement')
     grids = grids.split(',')
     instances = list(SquareModel.objects.filter(grid_id__in=grids, status='completed'))
@@ -80,7 +80,7 @@ def refine_pixel_size(grids: List[str]):
 
 
 def refine_pixel_size_from_targets(instances, spacings) -> Tuple[float, float]:
-    from Smartscope.core.models import Finder
+    from Smartscope.server.api.models import Finder
     import numpy as np
     from scipy.spatial.distance import cdist
     pixel_sizes = []

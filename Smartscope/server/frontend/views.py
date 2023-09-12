@@ -29,9 +29,9 @@ from Smartscope.core.cache import save_json_from_cache
 from Smartscope.core.protocols import load_protocol, set_protocol
 from Smartscope.core.preprocessing_pipelines import PREPROCESSING_PIPELINE_FACTORY, load_preprocessing_pipeline
 
-from Smartscope.core.models.grid import AutoloaderGrid
-from Smartscope.core.models.grid_collection_params import GridCollectionParams
-from Smartscope.core.models.screening_session import ScreeningSession
+from Smartscope.server.api.models.grid import AutoloaderGrid
+from Smartscope.server.api.models.grid_collection_params import GridCollectionParams
+from Smartscope.server.api.models.screening_session import ScreeningSession
 
 
 logger =logging.getLogger(__name__)

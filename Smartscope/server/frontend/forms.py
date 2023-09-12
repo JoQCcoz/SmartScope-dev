@@ -1,7 +1,6 @@
 from typing import Optional, Dict, Any
 from django import forms
-from django.urls import reverse
-from Smartscope.core.models import *
+from Smartscope.server.api.models import *
 from Smartscope.core.settings.worker import SMARTSCOPE_CUSTOM_CONFIG, SMARTSCOPE_DEFAULT_CONFIG, PROTOCOLS_FACTORY 
 from Smartscope.core.preprocessing_pipelines import PREPROCESSING_PIPELINE_FACTORY
 import yaml
@@ -12,7 +11,7 @@ from django.urls import reverse
 
 class ScreeningSessionForm(forms.ModelForm):
     class Meta:
-        from Smartscope.core.models.screening_session import ScreeningSession
+        # from Smartscope.core.models.screening_session import ScreeningSession
         model = ScreeningSession
         fields = ("session", "group", "user", "microscope_id", "detector_id", )  # 'atlas_x', 'atlas_y', 'squares_num', 'holes_per_square', 'target_defocus'
         labels = {"session": 'Session Name',
@@ -59,7 +58,7 @@ class AutoloaderGridForm(forms.ModelForm):
     protocol = forms.ChoiceField(choices=[('auto','auto')] + [(protocol,protocol) for protocol in PROTOCOLS_FACTORY.keys()])
 
     class Meta:
-        from Smartscope.core.models.grid import AutoloaderGrid
+        # from Smartscope.core.models.grid import AutoloaderGrid
         model = AutoloaderGrid
         fields = ('name', 'position', 'holeType', 'meshSize', 'meshMaterial')
         labels = dict(name='Name', position='Position', holeType='Hole Type', meshSize='Mesh Size', meshMaterial='Mesh Material')
@@ -88,7 +87,7 @@ class AutoloaderGridForm(forms.ModelForm):
 
 class AutoloaderGridReportForm(forms.ModelForm):
     class Meta:
-        from Smartscope.core.models.grid import AutoloaderGrid
+        # from Smartscope.core.models.grid import AutoloaderGrid
         model = AutoloaderGrid
         exclude = ['session_id', 'position', 'name', 'quality', 'notes', 'last_update',
                    'status', 'params_id', 'hole_angle', 'mesh_angle', 'start_time']
@@ -118,7 +117,7 @@ class MultishotCheckBox(MyCheckBox):
 
 class GridCollectionParamsForm(forms.ModelForm):
     class Meta:
-        from Smartscope.core.models.grid_collection_params import GridCollectionParams
+        # from Smartscope.core.models.grid_collection_params import GridCollectionParams
         model = GridCollectionParams
         exclude = ['square_x','square_y']
         help_texts = dict(
