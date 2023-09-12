@@ -1,5 +1,4 @@
-# from .base_model import *
-import os
+from .base_model import *
 from Smartscope.lib.image.smartscope_storage import SmartscopeStorage
 
 class ExtraPropertyMixin:
@@ -22,14 +21,13 @@ class ExtraPropertyMixin:
 
     @property
     def working_dir(self):
-        return os.getcwd()
-        # cache_key = f'{self.pk}_working_dir'
-        # if (wd := cache.get(cache_key)) is not None:
-        #     logger.debug(f'{self} loading from cache.')
-        #     return wd
+        cache_key = f'{self.pk}_working_dir'
+        if (wd := cache.get(cache_key)) is not None:
+            logger.debug(f'{self} loading from cache.')
+            return wd
         
-        # cache.set(cache_key, self.grid_id.directory, timeout=7200)
-        # return self.grid_id.directory
+        cache.set(cache_key, self.grid_id.directory, timeout=7200)
+        return self.grid_id.directory
 
     @ property
     def directory(self):

@@ -2,7 +2,7 @@ import os
 import logging
 from pathlib import Path
 
-from Smartscope.core.models.grid import AutoloaderGrid
+from Smartscope.server.api.models.grid import AutoloaderGrid
 from Smartscope.core.settings.worker import DEFAULT_PREPROCESSING_PIPELINE
 from Smartscope.lib.logger import add_log_handlers
 

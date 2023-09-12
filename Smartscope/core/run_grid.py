@@ -18,7 +18,7 @@ from .grid.run_hole import RunHole
 from .interfaces.microscope_interface import MicroscopeInterface
 
 from Smartscope.core.selectors import selector_wrapper
-from Smartscope.core.models import ScreeningSession, SquareModel, AutoloaderGrid
+from Smartscope.server.api.models import ScreeningSession, SquareModel, AutoloaderGrid
 from Smartscope.core.settings.worker import PROTOCOL_COMMANDS_FACTORY
 from Smartscope.core.status import status
 from Smartscope.core.protocols import get_or_set_protocol

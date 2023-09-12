@@ -246,7 +246,7 @@ class SerialemInterface(MicroscopeInterface):
             sem.SetDoseFracParams('P', 1, 0, 1)
 
         sem.KeepCameraSetChanges('P')
-        sem.SetLowDoseMode(1)
+        # sem.SetLowDoseMode(1)
 
     def refineZLP(self, zerolossDelay:float):
         if self.detector.energyFilter and zerolossDelay > 0:

@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 
 
-from Smartscope.core.models.grid import AutoloaderGrid
+from Smartscope.server.api.models.grid import AutoloaderGrid
 
 from django import forms
 

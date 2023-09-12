@@ -12,14 +12,14 @@ from django.contrib.contenttypes.models import ContentType
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
-from Smartscope.core.models import *
+from Smartscope.server.api.models import *
 # from Smartscope.core.run_grid import load_multishot_from_file
 from Smartscope.server.api.serializers import update_to_fullmeta, SvgSerializer
 
 logger = logging.getLogger(__name__)
 
 from django.db import models
-from .models.grid import AutoloaderGrid
+# from Smartscope.servemodels.grid import AutoloaderGrid
 
 class Websocket_update_decorator:
 
