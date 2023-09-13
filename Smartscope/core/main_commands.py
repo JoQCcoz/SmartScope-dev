@@ -6,7 +6,7 @@ from django.db import transaction
 from django.conf import settings
 from django.core.cache import cache
 
-from Smartscope.core.models import *
+from Smartscope.server.api.models import *
 from Smartscope.core.test_commands import *
 from Smartscope.lib.image.montage import Montage
 from Smartscope.lib.image.targets import Targets

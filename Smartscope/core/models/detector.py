@@ -1,5 +1,6 @@
-
-from .base_model import *
+from pydantic import Field
+from .base_model import SmartscopeBaseModel
+from .microscope import Microscope
 
 DETECTOR_CHOICES = (
     ('K2', 'Gatan K2'),
@@ -9,74 +10,28 @@ DETECTOR_CHOICES = (
     ('Falcon4', 'TFS Falcon 4')
 )
 
-class DetectorManager(models.Manager):
-    def get_by_natural_key(self, microscope_id, name):
-        return self.get(microscope_id=microscope_id, name=name)
+class Detector(SmartscopeBaseModel):
 
 
-class Detector(BaseModel):
-    from .microscope import Microscope
+    name: str
+    uid :int = Field(alias='id')
+    microscope_id:str
+    detector_model: str
+    atlas_mag: int
+    atlas_max_tiles_X: int
+    atlas_max_tiles_Y: int
+    spot_size: int
+    c2_perc: float
+    atlas_c2_aperture: int
+    # atlas_to_search_offset_x: float
+    # atlas_to_search_offset_y: float
+    # frame_align_cmd = models.CharField(max_length=30, default='alignframes')
+    gain_rot: int = 0
+    gain_flip: bool = True
+    energy_filter: bool = False
+    frames_windows_directory: str = 'movies'
+    frames_directory: str = '/mnt/scope/movies/'
 
-    name = models.CharField(max_length=100)
-    microscope_id = models.ForeignKey(
-        Microscope,
-        on_delete=models.CASCADE,
-        to_field='microscope_id'
-    )
-    detector_model = models.CharField(
-        max_length=30,
-        choices=DETECTOR_CHOICES
-    )
-    atlas_mag = models.IntegerField(default=210)
-    atlas_max_tiles_X = models.IntegerField(default=6)
-    atlas_max_tiles_Y = models.IntegerField(default=6)
-    spot_size = models.IntegerField(default=None, null=True)
-    c2_perc = models.FloatField(default=100)
-    atlas_c2_aperture = models.IntegerField(default=70, help_text='Size of the aperture in microns to use during the atlas procedure. Only works on TFS scopes')
-    atlas_to_search_offset_x = models.FloatField(
-        default=0,
-        help_text='X stage offset between the atlas and ' + \
-            'Search mag. Similar to the Shift to Marker offset. Does not do anything at this time.'
-    )
-    atlas_to_search_offset_y = models.FloatField(
-        default=0,
-        help_text='Y stage offset between the atlas and ' + \
-            'Search mag. Similar to the Shift to Marker offset. Does not do anything at this time.'
-    )
-    frame_align_cmd = models.CharField(max_length=30, default='alignframes')
-    gain_rot = models.IntegerField(default=0, null=True)
-    gain_flip = models.BooleanField(default=True)
-    energy_filter = models.BooleanField(default=False)
-    frames_windows_directory = models.CharField(
-        max_length=200,
-        default='movies',
-        help_text='Location of the frames from the perspective of SerialEM. ' + \
-            'This values will use the SetDirectory command.'
-    )
-    # frame_directory is path used in container
-    # that should be mapped to real dir at server
-    # for example: /mnt/krios_Raid_X/smartscope
-    frames_directory = models.CharField(
-        max_length=200,
-        default='/mnt/scope/movies/',
-        help_text='Location of the frames directory from SmartScope that point ' + \
-            'to the same location as frames_windows_directory.'
-    )
+    class Meta(SmartscopeBaseModel.Meta):
+        api_route = 'detectors'
 
-    objects = DetectorManager()
-
-    class Meta(BaseModel.Meta):
-        db_table = 'detector'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def __str__(self):
-        return f'{self.microscope_id} - {self.name}'
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        return self
-
-    def natural_key(self):
-        return (self.microscope_id, self.name)

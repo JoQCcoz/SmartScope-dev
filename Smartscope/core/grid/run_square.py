@@ -10,7 +10,7 @@ from .finders import find_targets
 from .run_io import get_file_and_process
 
 from Smartscope.core.selectors import selector_wrapper
-from Smartscope.core.models import HoleModel
+from Smartscope.server.api.models import HoleModel
 from Smartscope.core.status import status
 from Smartscope.core.protocols import get_or_set_protocol
 from Smartscope.core.db_manipulations import update, select_n_areas, add_targets, group_holes_for_BIS
