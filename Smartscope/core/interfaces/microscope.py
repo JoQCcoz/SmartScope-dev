@@ -2,7 +2,6 @@ from typing import Optional
 from dataclasses import dataclass
 from pydantic import BaseModel, Field
 
-
 @dataclass
 class MicroscopeState:
     defocusTarget: float = 0

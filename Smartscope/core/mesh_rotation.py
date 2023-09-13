@@ -1,7 +1,7 @@
 import numpy as np
 import logging
 from typing import Callable
-from Smartscope.core.models import AutoloaderGrid, SquareModel, HoleModel
+from Smartscope.server.api.models import AutoloaderGrid, SquareModel, HoleModel
 # from scipy.spatial import KDTree
 # from scipy.signal import correlate2d
 from scipy.spatial.distance import cdist #, pdist

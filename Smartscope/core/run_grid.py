@@ -3,10 +3,13 @@ import sys
 import time
 import logging
 from pathlib import Path
-from django.utils import timezone
-from django.conf import settings
+# from django.db import transaction
+from datetime import datetime
+# from django.conf import settings
 
 logger = logging.getLogger(__name__)
+
+from . import models
 
 from .grid.grid_status import GridStatus
 from .grid.finders import find_targets
@@ -16,22 +19,25 @@ from .grid.run_square import RunSquare
 from .grid.run_hole import RunHole
 
 from .interfaces.microscope_interface import MicroscopeInterface
+from .api_interface.rest_api_interface import update
 
 from Smartscope.core.selectors import selector_wrapper
-from Smartscope.server.api.models import ScreeningSession, SquareModel, AutoloaderGrid
-from Smartscope.core.settings.worker import PROTOCOL_COMMANDS_FACTORY
+
+# from Smartscope.server.api.models import SquareModel
+from Smartscope.core.settings import worker
 from Smartscope.core.status import status
 from Smartscope.core.protocols import get_or_set_protocol
-from Smartscope.core.preprocessing_pipelines import load_preprocessing_pipeline
-from Smartscope.core.db_manipulations import update, select_n_areas, queue_atlas, add_targets
+# from Smartscope.core.preprocessing_pipelines import load_preprocessing_pipeline
+from Smartscope.core.db_manipulations import select_n_areas, queue_atlas, add_targets
 
 from Smartscope.lib.image_manipulations import export_as_png
 
 
 def run_grid(
-        grid:AutoloaderGrid,
-        session:ScreeningSession,
-        
+        grid:models.AutoloaderGrid,
+        session: models.ScreeningSession,
+
+        # processing_queue:multiprocessing.JoinableQueue,
         scope:MicroscopeInterface
     ): #processing_queue:multiprocessing.JoinableQueue,
     """Main logic for the SmartScope process
@@ -40,11 +46,11 @@ def run_grid(
         session (ScreeningSession): ScreeningSession object from Smartscope.server.models
     """
     logger.info(f'###Check status of grid, grid ID={grid.grid_id}.')
-    session_id = session.pk
-    microscope = session.microscope_id
+    session_id = session.uid
+    microscope = scope.microscope
 
     # Set the Websocket_update_decorator grid property
-    update.grid = grid
+    # update.grid = grid
     if grid.status == GridStatus.COMPLETED:
         logger.info(f'Grid {grid.name} already complete. grid ID={grid.grid_id}')
         return
@@ -57,7 +63,7 @@ def run_grid(
     logger.info(f'Starting {grid.name}, status={grid.status}') 
     grid = update(grid, refresh_from_db=True, last_update=None)
     if grid.status is GridStatus.NULL:
-        grid = update(grid, status=GridStatus.STARTED, start_time=timezone.now())
+        grid = update(grid, status=GridStatus.STARTED, start_time=datetime.now())
 
     GridIO.create_grid_directories(grid.directory)
     logger.info(f"create and the enter into Grid directory={grid.directory}")
@@ -65,8 +71,9 @@ def run_grid(
     params = grid.params_id
 
     protocol = get_or_set_protocol(grid)
-    preprocessing = load_preprocessing_pipeline(Path('preprocessing.json'))
-    preprocessing.start(grid)
+    # resume_incomplete_processes(processing_queue, grid, session.microscope_id)
+    # preprocessing = load_preprocessing_pipeline(Path('preprocessing.json'))
+    # preprocessing.start(grid)
     is_stop_file(session_id)
     atlas = queue_atlas(grid)
 
@@ -88,7 +95,7 @@ def run_grid(
         )
         atlas = update(atlas,
             status=status.ACQUIRED,
-            completion_time=timezone.now()
+            completion_time=datetime.now()
         )
 
     # find targets
@@ -108,7 +115,7 @@ def run_grid(
             grid,
             atlas,
             targets,
-            SquareModel,
+            models.SquareModel,
             finder_method,
             classifier_method
         )
@@ -161,7 +168,7 @@ def run_grid(
                 continue
             hole = update(hole,
                 status=status.ACQUIRED,
-                completion_time=timezone.now()
+                completion_time=datetime.now()
             )
             RunHole.process_hole_image(hole, grid, microscope)
             if hole.status == status.SKIPPED:
@@ -186,11 +193,11 @@ def run_grid(
                 )
                 hm = update(hm,
                     status=status.ACQUIRED,
-                    completion_time=timezone.now(),
+                    completion_time=datetime.now(),
                     extra_fields=['is_x','is_y','offset','frames']
                 )
                 if hm.hole_id.bis_type != 'center':
-                    update(hm.hole_id, status=status.ACQUIRED, completion_time=timezone.now())
+                    update(hm.hole_id, status=status.ACQUIRED, completion_time=datetime.now())
             update(hole, status=status.COMPLETED)
             scope.reset_AFIS_image_shift(afis=params.afis)
             scope.refineZLP(params.zeroloss_delay)
@@ -209,20 +216,20 @@ def run_grid(
                     params,
                     square
                 )
-                square = update(square, status=status.ACQUIRED, completion_time=timezone.now())
-            RunSquare.process_square_image(square, grid, microscope)
+                square = update(square, status=status.ACQUIRED, completion_time=datetime.now())
+                RunSquare.process_square_image(square, grid, microscope)
         elif is_done:
             microscope_id = session.microscope_id.pk
-            tmp_file = os.path.join(settings.TEMPDIR, f'.pause_{microscope_id}')
+            tmp_file = os.path.join(worker.TEMPDIR, f'.pause_{microscope_id}')
             if os.path.isfile(tmp_file):
-                paused = os.path.join(settings.TEMPDIR, f'paused_{microscope_id}')
+                paused = os.path.join(worker.TEMPDIR, f'paused_{microscope_id}')
                 open(paused, 'w').close()
                 update(grid, status=GridStatus.PAUSED)
                 logger.info('SerialEM is paused')
                 while os.path.isfile(paused):
                     sys.stdout.flush()
                     time.sleep(3)
-                next_file = os.path.join(settings.TEMPDIR, f'next_{microscope_id}')
+                next_file = os.path.join(worker.TEMPDIR, f'next_{microscope_id}')
                 if os.path.isfile(next_file):
                     os.remove(next_file)
                     running = False
@@ -251,12 +258,35 @@ def get_queue(grid):
     return square, hole#[h for h in holes if not h.bisgroup_acquired]
 
 
-def is_stop_file(sessionid: str) -> bool:
-    stop_file = os.path.join(settings.TEMPDIR, f'{sessionid}.stop')
-    if os.path.isfile(stop_file):
-        logger.debug(f'Stop file {stop_file} found.')
-        os.remove(stop_file)
-        raise KeyboardInterrupt()
+
+# def resume_incomplete_processes(queue, grid, microscope_id):
+#     """Query database for models with incomplete processes
+#      and adds them to the processing queue
+
+#     Args:
+#         queue (multiprocessing.JoinableQueue): multiprocessing queue of objects
+#           for processing by    the processing_worker
+#         grid (AutoloaderGrid): AutoloadGrid object from Smartscope.server.models
+#         session (ScreeningSession): ScreeningSession object from Smartscope.server.models
+#     """
+#     squares = grid.squaremodel_set.filter(selected=1).exclude(
+#         status__in=[status.QUEUED, status.STARTED, status.COMPLETED]).order_by('number')
+#     holes = grid.holemodel_set.filter(selected=1).exclude(status__in=[status.QUEUED, \
+#         status.STARTED, status.PROCESSED, status.COMPLETED]).\
+#         order_by('square_id__number', 'number')
+#     for square in squares:
+#         logger.info(f'Square {square} was not fully processed')
+#         renew_queue = [RunSquare.process_square_image, [square, grid, microscope_id], {}]
+#         transaction.on_commit(lambda: queue.put(renew_queue))
+
+
+
+# def is_stop_file(sessionid: str) -> bool:
+#     stop_file = os.path.join(settings.TEMPDIR, f'{sessionid}.stop')
+#     if os.path.isfile(stop_file):
+#         logger.debug(f'Stop file {stop_file} found.')
+#         os.remove(stop_file)
+#         raise KeyboardInterrupt()
 
 
 def parse_method(method):
@@ -280,6 +310,32 @@ def runAcquisition(
         instance,
     ):
     for method in methods:
-        method, content, args, kwargs = parse_method(method)
-        output = PROTOCOL_COMMANDS_FACTORY[method](scope,params,instance, content, *args, **kwargs)
+        output = worker.PROTOCOL_COMMANDS_FACTORY[method](scope,params,instance)
     return output
+
+
+
+    
+
+
+
+
+# def print_queue(squares, holes, session):
+#     """Prints Queue to a file for displaying to the frontend
+
+#     Args:
+#         squares (list): list of squares returned from the get_queue method
+#         holes (list): list of holes returned from the get_queue method
+#         session (ScreeningSession): ScreeningSession object from Smartscope.server.models
+#     """
+#     string = ['------------------------------------------------------------\nCURRENT QUEUE:\n------------------------------------------------------------\nSquares:\n']
+#     for s in squares:
+#         string.append(f"\t{s.number} -> {s.name}\n")
+#     string.append(f'------------------------------------------------------------\nHoles: (total={len(holes)})\n')
+#     for h in holes:
+#         string.append(f"\t{h.number} -> {h.name}\n")
+#     string.append('------------------------------------------------------------\n')
+#     string = ''.join(string)
+#     with open(os.path.join(session.directory, 'queue.txt'), 'w') as f:
+#         f.write(string)
+
