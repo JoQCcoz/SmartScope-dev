@@ -18,9 +18,9 @@ def check_scope_locked(file:Path) -> None:
         return 
     raise MicroscopeBusyError(file, file.read_text())
 
-def write_session_lock(session:str, lockFile:Path) -> None:
+def write_session_lock(session_id:str, lockFile:Path) -> None:
     with open(lockFile, 'w') as f:
-        f.write(session)
+        f.write(session_id)
 
 def check_stop_file(stop_file:Path) -> None:
     if not stop_file.exists():

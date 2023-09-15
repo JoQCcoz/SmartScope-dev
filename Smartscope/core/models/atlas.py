@@ -1,23 +1,28 @@
-from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 from Smartscope.core.status import status
+from .base_model import SmartscopeBaseModel
 from .extra_property_mixin import ExtraPropertyMixin
-from .grid import AutoloaderGrid
 
 
-from Smartscope.core.svg_plots import drawAtlas
 
-class AtlasModel(BaseModel, ExtraPropertyMixin):
+
+
+# from Smartscope.core.svg_plots import drawAtlas
+
+class AtlasModel(SmartscopeBaseModel, ExtraPropertyMixin):
     name:str
+    grid_id: str
     pixel_size: Optional[float]
     binning_factor: Optional[float]
-    shape_x = Optional[int]
-    shape_y = Optional[int]
-    stage_z = Optional[float]
-    # grid_id = models.ForeignKey(AutoloaderGrid, on_delete=models.CASCADE, to_field='grid_id')
-    status = Optional[status]
-    completion_time = Optional[datetime]
+    shape_x: Optional[int]
+    shape_y: Optional[int]
+    stage_z: Optional[float]
+    status: Optional[str] 
+    completion_time: Optional[datetime]
+
+    class Meta(SmartscopeBaseModel.Meta):
+        api_route = 'atlas'
 
     # aliases
 

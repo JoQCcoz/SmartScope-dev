@@ -24,54 +24,39 @@ class status:
 
 
 
-class FileSignal:
+# class FileSignal:
 
-    def __init__(self, path:os.PathLike):
-        if not isinstance(path,Path):
-            self._path = Path(path)
-            return
-        self._path = path
+#     def __init__(self, path:os.PathLike):
+#         if not isinstance(path,Path):
+#             self._path = Path(path)
+#             return
+#         self._path = path
 
-    @property
-    def exists(self):
-        return self._path.exists
+#     @property
+#     def exists(self):
+#         return self._path.exists
     
-    def create(self):
-        return self._path.touch()
+#     def create(self):
+#         return self._path.touch()
 
-    def remove(self):
-        return self._path.unlink()
+#     def remove(self):
+#         return self._path.unlink()
 
+# @dataclass
+# class FileSignals:
+
+#     microscope_id:str
+#     session_id:str
+#     grid_id:str
+
+#     @property
+#     def paused_file(self) -> FileSignal:
+#         return FileSignal(Path(os.getenv('TEMPDIR'), f'paused_{self.microscope_id}'))
+
+#     @property
+#     def stop_file(self) -> FileSignal:
+#         return Path(os.getenv('TEMPDIR'), f'{self.session_id}.stop')
     
-    # @property
-    # def is_paused(self):
-    #     return self.paused_file.exists()
-    
-
-    
-    # @property
-    # def is_stop_file(self):
-    #     if not self.stop_file.exists():
-    #         return False
-    #     logger.debug(f'Stop file {self.stop_file} found.')
-    #     self.stop_file.unlink()
-    #     raise KeyboardInterrupt()
-
-@dataclass
-class FileSignals:
-
-    microscope_id:str
-    session_id:str
-    grid_id:str
-
-    @property
-    def paused_file(self) -> FileSignal:
-        return FileSignal(Path(os.getenv('TEMPDIR'), f'paused_{self.microscope_id}'))
-
-    @property
-    def stop_file(self) -> FileSignal:
-        return Path(os.getenv('TEMPDIR'), f'{self.session_id}.stop')
-    
-    @property
-    def session_lock(self) -> FileSignal:
-        return Path()
+#     @property
+#     def session_lock(self) -> FileSignal:
+#         return Path()

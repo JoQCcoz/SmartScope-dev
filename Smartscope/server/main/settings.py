@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'django_filters',
     'storages',
     'channels',
-    # 'Smartscope.server.main.apps.Frontend',
+    'Smartscope.server.main.apps.Frontend',
     'Smartscope.server.main.apps.API',
 ]
 

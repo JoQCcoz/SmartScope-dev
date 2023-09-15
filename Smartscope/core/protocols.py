@@ -7,7 +7,7 @@ from Smartscope.lib.converters import rgetattr
 
 logger = logging.getLogger(__name__)
 
-def load_protocol(file:Path):
+def load_protocol(file:Path=Path('protocol.yaml')):
     if file.exists():
         with open(file) as f:
             return BaseProtocol.model_validate(yaml.safe_load(f))
@@ -56,7 +56,6 @@ class AutoProtocol:
         if val[0] == '!':
             return attribute != value
         return attribute == value
-       
                 
 def save_protocol(protocol, file='protocol.yaml'):
     with open(file, 'w') as f:

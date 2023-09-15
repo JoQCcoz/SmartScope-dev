@@ -1,9 +1,11 @@
 from typing import get_args, get_origin, List
-from ..models.base_model import SmartscopeBaseModel
 import inspect
+from Smartscope.lib.Datatypes.querylist import QueryList
+from ..models.base_model import SmartscopeBaseModel
+
 
 def parse_output(func):
-    def wrapper_many(output_type:SmartscopeBaseModel,**kwargs) -> List[SmartscopeBaseModel]:
+    def wrapper_many(output_type:SmartscopeBaseModel,*args,**kwargs) -> List[SmartscopeBaseModel]:
         results = func(output_type=output_type,*args,**kwargs)
         
         for i,item in enumerate(results):
@@ -16,10 +18,10 @@ def parse_output(func):
     
     signature = inspect.signature(func)
     assert any([signature.return_annotation is SmartscopeBaseModel,
-               get_origin(signature.return_annotation) is list and get_args(signature.return_annotation)[0] is SmartscopeBaseModel]), \
+               get_origin(signature.return_annotation) is QueryList and get_args(signature.return_annotation)[0] is SmartscopeBaseModel]), \
                'Function does not have the proper return type, It should be SmartscopeBaseModel or List[SmartscopeBaseModel]'
 
-    if get_origin(signature.return_annotation) is list:
+    if get_origin(signature.return_annotation) is QueryList:
         return wrapper_many
     
     return wrapper_single

@@ -43,6 +43,11 @@ class DetectorSerializer(RESTserializers.ModelSerializer):
         model = Detector
         fields = '__all__'
 
+class GridCollectionParamsSerializer(RESTserializers.ModelSerializer):
+    class Meta:
+        model = GridCollectionParams
+        fields = '__all__'
+
 
 class SessionSerializer(RESTserializers.ModelSerializer):
     class Meta:

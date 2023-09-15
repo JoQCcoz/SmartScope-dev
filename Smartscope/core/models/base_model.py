@@ -1,8 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 class SmartscopeBaseModel(BaseModel):
-
-    
 
     class Meta:
         api_route = 'NotImplemented'

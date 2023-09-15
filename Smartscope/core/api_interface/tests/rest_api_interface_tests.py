@@ -1,5 +1,5 @@
 import pytest
-from ..rest_api_interface import get_from_API, get_single, update, patch_single, generate_get_url, RequestUnsuccessfulError
+from ..rest_api_interface import get_from_API, get_single, get_many, update, patch_single, generate_get_url, RequestUnsuccessfulError
 from Smartscope.core.models import Microscope, Detector
 
 def test_generate_get_url():
@@ -24,6 +24,11 @@ def test_get_single():
     assert isinstance(response, Microscope)
     assert response.name == 'fake_scope'
     assert response.uid == 'h0PgRUjUq2K2Cr1CGZJq3q08il8i5n'
+
+def test_get_many():
+    results = get_many(output_type=Detector,name='test_k2', id=3)
+    assert len(results) == 1
+    assert isinstance(results[0],Detector)
 
 def test_patch_single():
     object_id = '3'
