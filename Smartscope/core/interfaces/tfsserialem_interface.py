@@ -1,6 +1,5 @@
 import serialem as sem
 from typing import Callable, Optional
-import functools
 import time
 import logging
 from .serialem_interface import SerialemInterface

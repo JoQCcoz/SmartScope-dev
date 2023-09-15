@@ -1,5 +1,6 @@
 import requests
 from typing import Dict, List
+from Smartscope.lib.Datatypes.querylist import QueryList
 from Smartscope.core.models.base_model import SmartscopeBaseModel
 from Smartscope.core.settings.worker import API_BASE_URL, API_KEY
 
@@ -54,9 +55,10 @@ def get_single(object_id,output_type:SmartscopeBaseModel, auth_header:Dict=AUTH_
     return response.json()
 
 @parse_output
-def get_many(url,output_type:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER) -> List[SmartscopeBaseModel]:
+def get_many(output_type:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER, **filters) -> QueryList[SmartscopeBaseModel]:
+    url = generate_get_url(route=output_type.api_route,filters=filters)
     response =  get_from_API(url, auth_header)
-    return response.json()['results']
+    return QueryList(response.json()['results'])
 
 
 def update(instance:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER, **fields) -> SmartscopeBaseModel:

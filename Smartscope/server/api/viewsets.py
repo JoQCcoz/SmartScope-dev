@@ -186,6 +186,14 @@ class DetectorViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+class GridCollectionParamsViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows ScreeningSessions to be viewed or edited.
+    """
+    queryset = GridCollectionParams.objects.all()
+    serializer_class = GridCollectionParamsSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 class ScreeningSessionsViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows ScreeningSessions to be viewed or edited.

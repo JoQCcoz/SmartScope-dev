@@ -8,6 +8,7 @@ from datetime import datetime
 import glob
 import logging
 from pathlib import Path
+from ..settings import worker
 
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,8 @@ class GridIO:
         return working_dir
 
     @staticmethod
-    def create_grid_directories(path: str) -> None:
-        path = Path(path)
+    def create_grid_directories(session,grid) -> None:
+        path = Path(worker.AUTOSCREENDIR, session.working_dir, grid.directory)
         for directory in [path, path / 'raw', path / 'pngs']:
-            directory.mkdir(exist_ok=True)
+            directory.mkdir(parents=True,exist_ok=True)
+        return path

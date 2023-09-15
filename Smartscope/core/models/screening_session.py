@@ -28,38 +28,15 @@ class ScreeningSession(SmartscopeBaseModel):
         if isinstance(v,str):
             return v
         return str(v)
+    
     # @property
     # def directory(self):
-    #     cache_key = f'{self.session_id}_directory'
-    #     if (directory:=cache.get(cache_key)) is not None:
-    #         logger.info(f'Session {self} directory from cache.')
-    #         return directory
+    #     return Path(worker.AUTOSCREENDIR, self.working_dir)
 
-    #     if settings.USE_STORAGE:
-    #         cwd = os.path.join(settings.AUTOSCREENDIR, self.working_dir)
-    #         if os.path.isdir(cwd):
-    #             cache.set(cache_key,cwd,timeout=21600)
-    #             return cwd
-
-    #     if settings.USE_LONGTERMSTORAGE:
-    #         cwd_storage = os.path.join(settings.AUTOSCREENSTORAGE, self.working_dir)
-    #         if os.path.isdir(cwd_storage):
-    #             cache.set(cache_key,cwd_storage,timeout=21600)
-    #             return cwd_storage
-
-    #     if settings.USE_AWS:
-    #         storage = SmartscopeStorage()
-    #         if storage.dir_exists(self.working_dir):
-    #             cache.set(cache_key,self.working_dir,timeout=21600)
-    #             return self.working_dir
-
-    #     if settings.USE_STORAGE:
-    #         cache.set(cache_key,cwd,timeout=21600)
-    #         return cwd
 
     @property
     def stop_file(self):
-        return Path(worker.TEMPDIR, f'{self.session_id}.stop')
+        return Path(worker.TEMPDIR, f'{self.uid}.stop')
     
     # @property
     # def progress(self):

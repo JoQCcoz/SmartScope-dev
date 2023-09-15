@@ -27,7 +27,7 @@ class Microscope(SmartscopeBaseModel):
 
     @property
     def lock_file(self) -> Path:
-        return Path(worker.TEMPDIR, f'{self.microscope_id}.lock')
+        return Path(worker.TEMPDIR, f'{self.uid}.lock')
 
     # @property
     # def isLocked(self):
