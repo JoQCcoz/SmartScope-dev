@@ -1,6 +1,10 @@
 from datetime import datetime
 from typing import Optional
+from pydantic import Field, field_validator
+
+from Smartscope.lib.Datatypes.models import generate_unique_id
 from Smartscope.core.status import status
+
 from .base_model import SmartscopeBaseModel
 from .extra_property_mixin import ExtraPropertyMixin
 
@@ -13,13 +17,14 @@ from .extra_property_mixin import ExtraPropertyMixin
 class AtlasModel(SmartscopeBaseModel, ExtraPropertyMixin):
     name:str
     grid_id: str
-    pixel_size: Optional[float]
-    binning_factor: Optional[float]
-    shape_x: Optional[int]
-    shape_y: Optional[int]
-    stage_z: Optional[float]
-    status: Optional[str] 
-    completion_time: Optional[datetime]
+    uid:Optional[str] = Field(alias='atlas_id', default=None)
+    pixel_size: Optional[float] = None
+    binning_factor: Optional[float] = None
+    shape_x: Optional[int] = None
+    shape_y: Optional[int] = None
+    stage_z: Optional[float] = None
+    status: Optional[str] = None
+    completion_time: Optional[datetime] = None
 
     class Meta(SmartscopeBaseModel.Meta):
         api_route = 'atlas'

@@ -48,6 +48,12 @@ def patch_single(url,data,auth_header:Dict=AUTH_HEADER) -> requests.Response:
         raise RequestUnsuccessfulError(response)
     return response
 
+def post(url, data, auth_header:Dict=AUTH_HEADER) -> requests.Response:
+    response = requests.post(url=url,data=data,headers=auth_header)
+    if response.status_code != 200:
+        raise RequestUnsuccessfulError(response)    
+    return response
+
 @parse_output
 def get_single(object_id,output_type:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER) -> SmartscopeBaseModel:
     url = generate_get_single_url(object_id=object_id, route=output_type.api_route)
@@ -65,3 +71,14 @@ def update(instance:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER, **fields)
     url = generate_get_single_url(instance.uid,route=instance.api_route)
     reponse = patch_single(url=url, data=fields,auth_header=auth_header)
     return instance.model_validate(reponse.json())
+
+def post_single(instance:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER) -> SmartscopeBaseModel:
+    url = generate_get_url(route=instance.api_route)
+    response = post(url,data=instance.model_dump(),auth_header=auth_header)
+    return instance.model_validate(response.json())
+
+@parse_output
+def post_many(instances: QueryList[SmartscopeBaseModel],output_type:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER ) -> QueryList[SmartscopeBaseModel]:
+    url = generate_get_url(route=instances.first().api_route)
+    response = post(url,data=instances.dump_all(),auth_header=auth_header)
+    return QueryList(response.json()['results'])    

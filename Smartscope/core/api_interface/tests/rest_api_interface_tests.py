@@ -1,6 +1,6 @@
 import pytest
-from ..rest_api_interface import get_from_API, get_single, get_many, update, patch_single, generate_get_url, RequestUnsuccessfulError
-from Smartscope.core.models import Microscope, Detector
+from ..rest_api_interface import get_from_API, get_single, get_many, update, post, patch_single, generate_get_url, RequestUnsuccessfulError
+from Smartscope.core.models import Microscope, Detector, AtlasModel
 
 def test_generate_get_url():
     url = generate_get_url(base_url='http://testurl/api', route='microscopes', filters=dict(name='fake_scope', microscope_id='h0PgRUjUq2K2Cr1CGZJq3q08il8i5n' ))
@@ -50,4 +50,13 @@ def test_update():
     assert instance.atlas_max_tiles_X == 7
     instance = update(instance=instance, atlas_max_tiles_X=6)
     assert instance.atlas_max_tiles_X == 6
+
+def test_post():
+    object = AtlasModel.model_validate(dict(name='testingAtlas', grid_id='1grid1iMBlVlmI4PH5rhyndru1vh0M'))
+    url = f'http://nginx:80/api/atlas/'
+    output = post(url=url,data=object.model_dump(exclude_none=True,by_alias=True))
+    print(output)
+    assert output['atlas_id'] is not None
+
+
 
