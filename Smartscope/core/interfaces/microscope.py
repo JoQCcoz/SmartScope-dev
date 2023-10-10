@@ -1,6 +1,6 @@
 from typing import Optional
 from dataclasses import dataclass
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 @dataclass
 class MicroscopeState:
@@ -28,6 +28,8 @@ class MicroscopeState:
         self.imageShiftY = 0
 
 class AtlasSettings(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     mag:int = Field(alias='atlas_mag')
     maxX:int = Field(alias='atlas_max_tiles_X')
     maxY:int = Field(alias='atlas_max_tiles_Y')
@@ -37,17 +39,16 @@ class AtlasSettings(BaseModel):
     atlas_to_search_offset_y:float
     atlas_c2_aperture: Optional[int] = None
 
-    class Config:
-        from_attributes=True
 
 class Detector(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     energyFilter:bool = Field(alias='energy_filter')
     framesDir:str = Field(alias='frames_windows_directory')
 
-    class Config:
-        from_attributes=True
-
 class Microscope(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     loaderSize:int = Field(alias='loader_size')
     ip:str = Field(alias='serialem_IP')
     port:int = Field(alias='serialem_PORT')
@@ -55,9 +56,6 @@ class Microscope(BaseModel):
     scopePath:str = Field(alias='scope_path')
     apertureControl:bool = Field(alias='aperture_control', default=False)
     coldFEG:bool = Field(alias='cold_FEG', default=False)
-
-    class Config:
-        from_attributes=True
 
 class CartridgeLoadingError(Exception):
     pass

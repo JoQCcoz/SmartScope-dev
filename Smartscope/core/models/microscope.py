@@ -8,7 +8,6 @@ class Microscope(SmartscopeBaseModel):
     location: str
     voltage:int
     spherical_abberation: float
-    uid: str = Field(alias='microscope_id')
     cold_FEG: bool = False
     aperture_control: bool = False
     vendor: str = 'TFS'
@@ -23,6 +22,7 @@ class Microscope(SmartscopeBaseModel):
 
     class Meta:
         api_route = 'microscopes'
+        uid_alias = 'microscope_id'
 
 
     @property

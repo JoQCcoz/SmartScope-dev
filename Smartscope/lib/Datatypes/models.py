@@ -4,7 +4,7 @@ import string
 from datetime import datetime
 from pathlib import Path
 from typing import List, Union, Dict
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 import numpy as np
 
 def generate_unique_id(extra_inputs=[], N=30):
@@ -24,6 +24,7 @@ class Finder(BaseModel):
     method_name: str
 
 class Target(BaseModel, ABC):
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True)
     name: str
     number: int
     grid_id: str
@@ -36,9 +37,6 @@ class Target(BaseModel, ABC):
 
     finders: List[Finder]
     ## NEED TO ADD CLASSIFIERS AND SELECTORS BUT IT'S GOOD FOR TESTING RIGHT NOW
-    class Config:
-        allow_population_by_field_name = True
-        orm_mode=True
 
     @property
     def stage_coords(self) -> np.ndarray:

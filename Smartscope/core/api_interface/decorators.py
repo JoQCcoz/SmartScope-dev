@@ -7,10 +7,11 @@ from ..models.base_model import SmartscopeBaseModel
 def parse_output(func):
     def wrapper_many(output_type:SmartscopeBaseModel,*args,**kwargs) -> List[SmartscopeBaseModel]:
         results = func(output_type=output_type,*args,**kwargs)
-        
+        if isinstance(results,dict):
+            results = results['results']
         for i,item in enumerate(results):
             results[i] = output_type.model_validate(item)
-        return results
+        return QueryList(results)
         
     def wrapper_single(output_type:SmartscopeBaseModel, *args, **kwargs) -> SmartscopeBaseModel:
         output = func(output_type=output_type,*args,**kwargs)
