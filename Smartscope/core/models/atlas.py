@@ -17,7 +17,7 @@ from .extra_property_mixin import ExtraPropertyMixin
 class AtlasModel(SmartscopeBaseModel, ExtraPropertyMixin):
     name:str
     grid_id: str
-    uid:Optional[str] = Field(alias='atlas_id', default=None)
+    uid:Optional[str]
     pixel_size: Optional[float] = None
     binning_factor: Optional[float] = None
     shape_x: Optional[int] = None
@@ -28,6 +28,7 @@ class AtlasModel(SmartscopeBaseModel, ExtraPropertyMixin):
 
     class Meta(SmartscopeBaseModel.Meta):
         api_route = 'atlas'
+        uid_alias = 'atlas_id'
 
     # aliases
 

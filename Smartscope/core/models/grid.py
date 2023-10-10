@@ -25,6 +25,7 @@ class AutoloaderGrid(SmartscopeBaseModel):
 
     class Meta(SmartscopeBaseModel.Meta):
         api_route = 'grids'
+        uid_alias = 'grid_id'
 
     # @property
     # def atlas(self):

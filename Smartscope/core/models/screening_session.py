@@ -1,16 +1,16 @@
 from pathlib import Path
-from pydantic import Field
+# from pydantic import Field
 from datetime import datetime
+from typing import Optional, Union, Dict, Any
 from .base_model import SmartscopeBaseModel
-from pydantic import field_validator
-from Smartscope.lib.image.smartscope_storage import SmartscopeStorage
+from pydantic import field_validator, model_validator
+# from Smartscope.lib.image.smartscope_storage import SmartscopeStorage
 from Smartscope.core.settings import worker
-from Smartscope import __version__ as SmartscopeVersion
+# from Smartscope import __version__ as SmartscopeVersion
 
 class ScreeningSession(SmartscopeBaseModel):
     # from .microscope import Microscope
     # from .detector import Detector
-    uid: str = Field(alias='session_id')
     session:str
     group: str
     date: datetime
@@ -21,6 +21,7 @@ class ScreeningSession(SmartscopeBaseModel):
 
     class Meta:
         api_route = 'sessions'
+        uid_alias = 'session_id'
 
     @field_validator('detector_id', mode='before')
     @classmethod
@@ -28,6 +29,8 @@ class ScreeningSession(SmartscopeBaseModel):
         if isinstance(v,str):
             return v
         return str(v)
+        
+    
     
     # @property
     # def directory(self):

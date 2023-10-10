@@ -6,7 +6,7 @@ from django.http import FileResponse
 from django.template.loader import render_to_string
 from rest_framework import viewsets
 from rest_framework import permissions
-from rest_framework import status
+from rest_framework import status as rest_status
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -54,6 +54,35 @@ def svg_as_png(instance, context):
         img = io.BytesIO(f.read())
 
     return img, f'{instance.name}.png'
+
+class GeneralActionsMixin:
+
+    @action(detail=False, methods=['post'])
+    def delete_many(self,request):
+        logger.debug('Received delete_many request')
+        logger.debug(request.data)
+        queryset = self.queryset.filter(pk__in=request.data)
+        logger.debug(queryset)
+        queryset.delete()
+        return Response(status=rest_status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=False, methods=['post'])
+    def post_many(self, request, *args, **kwargs):
+        logger.debug('Received post_many request')
+        logger.debug(request.data)
+        serializer = self.get_serializer(data=request.data, many=True)
+        try:
+            if serializer.is_valid():
+                logger.debug(f'Valid!')
+                objs = serializer.create(serializer.validated_data)
+            logger.debug(f'Created {len(objs)} objects')
+            headers = self.get_success_headers(serializer.data)
+            output = self.get_serializer(data=objs,many=True)
+            output.is_valid()
+            return Response(data=output.data, status=rest_status.HTTP_201_CREATED)
+        except Exception as err:
+            logger.exception(f'Error while posting many, {err}.')
+            return Response(serializer.errors, status=rest_status.HTTP_400_BAD_REQUEST)
 
 class ExtraActionsMixin:
 
@@ -150,7 +179,7 @@ class TargetRouteMixin:
     def scipion_plugin(self, request, *args, **kwargs):
         return self.detailedMany(request=request,*args,serializer=ScipionPluginHoleSerializer ,*kwargs)
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     """
     API endpoint that allows users to be viewed or edited.
     """
@@ -159,7 +188,7 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAdminUser]
 
 
-class GroupViewSet(viewsets.ModelViewSet):
+class GroupViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     """
     API endpoint that allows groups to be viewed or edited.
     """
@@ -168,7 +197,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAdminUser]
 
 
-class MicroscopeViewSet(viewsets.ModelViewSet):
+class MicroscopeViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     """
     API endpoint that allows ScreeningSessions to be viewed or edited.
     """
@@ -177,7 +206,7 @@ class MicroscopeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class DetectorViewSet(viewsets.ModelViewSet):
+class DetectorViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     """
     API endpoint that allows ScreeningSessions to be viewed or edited.
     """
@@ -185,8 +214,10 @@ class DetectorViewSet(viewsets.ModelViewSet):
     serializer_class = DetectorSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    filterset_fields = ['id', 'microscope_id', 'name']
 
-class GridCollectionParamsViewSet(viewsets.ModelViewSet):
+
+class GridCollectionParamsViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     """
     API endpoint that allows ScreeningSessions to be viewed or edited.
     """
@@ -194,7 +225,7 @@ class GridCollectionParamsViewSet(viewsets.ModelViewSet):
     serializer_class = GridCollectionParamsSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class ScreeningSessionsViewSet(viewsets.ModelViewSet):
+class ScreeningSessionsViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     """
     API endpoint that allows ScreeningSessions to be viewed or edited.
     """
@@ -341,7 +372,7 @@ class ScreeningSessionsViewSet(viewsets.ModelViewSet):
         return None, 'No PID file found for session'
 
 
-class MeshMaterialViewSet(viewsets.ModelViewSet):
+class MeshMaterialViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     """
     API endpoint that allows Mesh Material to be viewed or edited.
     """
@@ -350,7 +381,7 @@ class MeshMaterialViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class MeshSizeViewSet(viewsets.ModelViewSet):
+class MeshSizeViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     """
     API endpoint that allows Mesh Sizes to be viewed or edited.
     """
@@ -359,7 +390,7 @@ class MeshSizeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class HoleTypeViewSet(viewsets.ModelViewSet):
+class HoleTypeViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     """
     API endpoint that allows Hole types to be viewed or edited.
     """
@@ -368,7 +399,7 @@ class HoleTypeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class AutoloaderGridViewSet(viewsets.ModelViewSet, ExtraActionsMixin):
+class AutoloaderGridViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActionsMixin):
     """
     API endpoint that allows Grids to be viewed or edited.
     """
@@ -432,7 +463,7 @@ class AutoloaderGridViewSet(viewsets.ModelViewSet, ExtraActionsMixin):
         return Response(data=serializer.data)
 
 
-class AtlasModelViewSet(viewsets.ModelViewSet, ExtraActionsMixin):
+class AtlasModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActionsMixin):
     """
     API endpoint that allows Atlases to be viewed or edited.
     """
@@ -447,7 +478,7 @@ class AtlasModelViewSet(viewsets.ModelViewSet, ExtraActionsMixin):
         return super().load_card(request, **kwargs)
 
 
-class SquareModelViewSet(viewsets.ModelViewSet, ExtraActionsMixin, TargetRouteMixin):
+class SquareModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActionsMixin, TargetRouteMixin):
     """
     API endpoint that allows Squares to be viewed or edited.
     """
@@ -505,7 +536,7 @@ class SquareModelViewSet(viewsets.ModelViewSet, ExtraActionsMixin, TargetRouteMi
             return Response(dict(success=False))
 
 
-class HoleModelViewSet(viewsets.ModelViewSet, ExtraActionsMixin, TargetRouteMixin):
+class HoleModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActionsMixin, TargetRouteMixin):
     """
     API endpoint that allows Squares to be viewed or edited.
     """
@@ -563,7 +594,7 @@ class HoleModelViewSet(viewsets.ModelViewSet, ExtraActionsMixin, TargetRouteMixi
         return Response(dict(data=serializer.data, count=count))
 
 
-class HighMagModelViewSet(viewsets.ModelViewSet, ExtraActionsMixin, TargetRouteMixin):
+class HighMagModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActionsMixin, TargetRouteMixin):
     """
     API endpoint that allows Atlases to be viewed or edited.
     """
