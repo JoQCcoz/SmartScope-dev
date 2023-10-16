@@ -1,17 +1,17 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers as RESTserializers
 # from Smartscope.core.model import *
-from .models.microscope import Microscope
-from .models.detector import Detector
-from .models.screening_session import ScreeningSession
-from .models.grid import AutoloaderGrid
-from .models.hole_type import HoleType
-from .models.hole import HoleModel
-from .models.grid_collection_params import GridCollectionParams
-from .models.mesh import MeshMaterial, MeshSize
-from .models.atlas import AtlasModel
-from .models.square import SquareModel
-from .models.high_mag import HighMagModel
+from ..models.microscope import Microscope
+from ..models.detector import Detector
+from ..models.screening_session import ScreeningSession
+from ..models.grid import AutoloaderGrid
+from ..models.hole_type import HoleType
+from ..models.hole import HoleModel
+from ..models.grid_collection_params import GridCollectionParams
+from ..models.mesh import MeshMaterial, MeshSize
+from ..models.atlas import AtlasModel
+from ..models.square import SquareModel
+from ..models.high_mag import HighMagModel
 # from Smartscope.lib.storage.smartscope_storage import SmartscopeStorage
 from Smartscope.lib.converters import *
 import logging

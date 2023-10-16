@@ -15,3 +15,8 @@ def get_file_and_process(raw, name, directory='', force_reprocess=False):
     montage = Montage(name)
     montage.load_or_process(force_process=force_reprocess)
     return montage
+
+def load_montage(name):
+    montage = Montage(name)
+    montage.read_data()
+    return montage

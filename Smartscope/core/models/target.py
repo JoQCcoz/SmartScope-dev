@@ -1,40 +1,31 @@
 
 import numpy as np
-
+from datetime import datetime
+from typing import List, Optional, Union
 from Smartscope.core.settings.worker import PLUGINS_FACTORY
+from .base_model import SmartscopeBaseModel
+from pydantic import Field
+from Smartscope.core.status import status
+from Smartscope.lib.Datatypes.querylist import QueryList
+from .target_label import Finder, Classifier, Selector
 
 
-
-class Target(BaseModel):
-    from .grid import AutoloaderGrid
-    from .target_label import Finder, Classifier, Selector
+class Target(SmartscopeBaseModel):
     
-    name = models.CharField(max_length=100, null=False)
-    number = models.IntegerField()
-    pixel_size = models.FloatField(null=True)
-    shape_x = models.IntegerField(null=True)
-    shape_y = models.IntegerField(null=True)
-    selected = models.BooleanField(default=False)
-    status = models.CharField(
-        max_length=20,
-        null=True,
-        default=None
-    )
-    grid_id = models.ForeignKey(
-        AutoloaderGrid,
-        on_delete=models.CASCADE,
-        to_field='grid_id'
-    )
-    completion_time = models.DateTimeField(null=True)
-    # Generic Relations, not fields
-    finders = GenericRelation(Finder, related_query_name='target')
-    classifiers = GenericRelation(Classifier, related_query_name='target')
-    selectors = GenericRelation(Selector, related_query_name='target')
-
-    display = DisplayManager()
-
-    class Meta:
-        abstract = True
+    number:int
+    grid_id:str
+    name: Optional[str] = None
+    pixel_size: Optional[float] = None
+    shape_x: Optional[int] = None
+    shape_y: Optional[int] = None
+    selected: bool = False
+    status:Union[str,None] = status.NULL
+    
+    completion_time: Optional[datetime] = None
+    targets: List['Target'] = Field(default_factory=list)
+    finders: List[Finder] = Field(default_factory=list)
+    classifiers: List[Classifier] = Field(default_factory=list)
+    selectors: List[Selector] = Field(default_factory=list)
 
     @property
     def group(self):

@@ -37,8 +37,10 @@ def generate_get_url(base_url:str=API_BASE_URL,route:str='',filters:Dict=dict(),
         url += f'{i}={j}&' 
     return url
 
-def generate_get_single_url(object_id:str, base_url:str=API_BASE_URL, route:str='') -> str:
-    return f'{add_trailing_slash(base_url)}{route}/{object_id}/'
+def generate_get_single_url(object_id:str, base_url:str=API_BASE_URL, route:str='', route_suffix:str='') -> str:
+    if route_suffix != '':
+        route_suffix = f'{route_suffix}/'
+    return f'{add_trailing_slash(base_url)}{route}/{route_suffix}{object_id}/'
 
 
 def get_from_API(url, auth_header:Dict=AUTH_HEADER) -> requests.Response:
@@ -73,8 +75,8 @@ def get_many(output_type:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER, **fi
 
 
 
-def update(instance:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER, **fields) -> SmartscopeBaseModel:
-    url = generate_get_single_url(instance.uid,route=instance.api_route)
+def update(instance:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER, route_suffix:str='', **fields) -> SmartscopeBaseModel:
+    url = generate_get_single_url(instance.uid,route=instance.api_route, route_suffix=route_suffix)
     reponse = patch_single(url=url, data=fields,auth_header=auth_header)
     return instance.model_validate(reponse.json())
 
@@ -84,8 +86,8 @@ def post_single(instance:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER) -> S
     return instance.model_validate(response)
 
 @parse_output
-def post_many(instances: QueryList[SmartscopeBaseModel],output_type:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER ) -> QueryList[SmartscopeBaseModel]:
-    url = generate_get_url(route=instances.first().api_route, route_suffixes=['post_many'])
+def post_many(instances: QueryList[SmartscopeBaseModel],output_type:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER, route_suffixes=['post_many'] ) -> QueryList[SmartscopeBaseModel]:
+    url = generate_get_url(route=instances.first().api_route, route_suffixes=route_suffixes)
     response = post(url,data=instances.dump_all(),auth_header=auth_header)
     return response
 

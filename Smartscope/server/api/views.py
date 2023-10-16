@@ -1,10 +1,10 @@
 from django.http import HttpResponse
 from django.conf import settings
-from django.contrib.auth.models import User, Group
-from django.contrib.auth import login, logout
-from django.shortcuts import resolve_url
-from django.shortcuts import redirect
-
+from rest_framework import response
+from Smartscope.core.db_manipulations import update, update_target_selection, update_target_label
+from .models import *
+from .serializers.serializers import *
+from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 from rest_framework.response import Response

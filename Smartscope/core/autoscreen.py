@@ -46,9 +46,9 @@ def autoscreen(session_id:str):
         scope_interface = select_microscope_interface(microscope)
         
         with scope_interface(
-                microscope = Microscope.model_validate(microscope),
-                detector= Detector.model_validate(detector),
-                atlas_settings= AtlasSettings.model_validate(detector)
+                microscope = Microscope.model_validate(microscope,from_attributes=True),
+                detector= Detector.model_validate(detector,from_attributes=True),
+                atlas_settings= AtlasSettings.model_validate(detector,from_attributes=True)
             ) as scope:
             # processing_queue = multiprocessing.JoinableQueue()
             # child_process = multiprocessing.Process(
