@@ -1,5 +1,5 @@
 from Smartscope.core.models import AutoloaderGrid
-from Smartscope.server.api.export_serializers import ExportMetaSerializer
+from Smartscope.server.api.serializers.export_serializers import ExportMetaSerializer
 from rest_framework_yaml.renderers import YAMLRenderer
 import yaml
 

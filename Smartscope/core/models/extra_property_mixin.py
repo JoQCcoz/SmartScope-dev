@@ -47,6 +47,10 @@ class ExtraPropertyMixin:
     @ property
     def raw_mrc(self):
         return os.path.join(self.working_dir, 'raw', f'{self.name}.mrc')
+    
+    @ property
+    def raw(self):
+        return f'{self.name}.mrc'
 
     @ property
     def ctf_img(self):

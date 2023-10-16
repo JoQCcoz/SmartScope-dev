@@ -43,13 +43,13 @@ def autoscreen(session_id:str):
         # logger.info(f'Process: {process}')
         logger.info(f'Session: {session}')
         logger.info(f"Grids: {', '.join([grid.__str__() for grid in grids])}")
-        scopeInterface, additional_settings = select_microscope_interface(microscope)
-
-        with scopeInterface(
+        scope_interface, additional_settings = select_microscope_interface(microscope)
+        
+        with scope_interface(
+                microscope = Microscope.model_validate(microscope,from_attributes=True),
+                detector= Detector.model_validate(detector,from_attributes=True),
+                atlas_settings= AtlasSettings.model_validate(detector,from_attributes=True),
                 additional_settings=additional_settings
-                microscope = microscope,
-                detector= detector,
-                atlas_settings= AtlasSettings.model_validate(detector)
             ) as scope:
             # processing_queue = multiprocessing.JoinableQueue()
             # child_process = multiprocessing.Process(

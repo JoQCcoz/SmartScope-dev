@@ -23,7 +23,6 @@ import mrcfile.mrcinterpreter
 import mrcfile.mrcfile
 
 from .serializers import *
-from .export_serializers import *
 from Smartscope.server.api.permissions import HasGroupPermission
 from Smartscope.server.frontend.forms import *
 
@@ -83,7 +82,7 @@ class GeneralActionsMixin:
         except Exception as err:
             logger.exception(f'Error while posting many, {err}.')
             return Response(serializer.errors, status=rest_status.HTTP_400_BAD_REQUEST)
-
+        
 class ExtraActionsMixin:
 
     def load(self, request, **kwargs):
@@ -139,6 +138,8 @@ class ExtraActionsMixin:
         return response
 
 
+
+
 class TargetRouteMixin:
 
     detailed_serializer = None
@@ -160,7 +161,14 @@ class TargetRouteMixin:
     @ action(detail=False, methods=['get'], url_path='detailed')
     def detailedMany(self, request, *args, serializer=None, **kwargs):
         self.serializer_class = self.get_detailed_serializer(serializer)
-        page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+        
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
@@ -177,7 +185,29 @@ class TargetRouteMixin:
     
     @ action(detail=False, methods=['get'], url_path='scipion_plugin')
     def scipion_plugin(self, request, *args, **kwargs):
-        return self.detailedMany(request=request,*args,serializer=ScipionPluginHoleSerializer ,*kwargs)
+        return self.detailedMany(request=request,*args,serializer=ScipionPluginHoleSerializer ,**kwargs)
+
+    @action(detail=False, methods=['post'])
+    def add_targets(self, request, *args, **kwargs):
+        logger.debug('Received create_targets request')
+        self.serializer_class = self.get_detailed_serializer()
+        serializer = self.get_serializer(data=request.data, many=True)
+        try:
+            logger.debug(request.data[0])
+            if serializer.is_valid(raise_exception=True):
+                logger.debug(f'Valid!')
+                objs, labels = serializer.create(request.data)
+                logger.debug(f'Created {len(objs)} objects')
+                with transaction.atomic():
+                    objs = [obj.save() for obj in objs]
+                    [label.save() for label in labels]
+                outputs = self.get_serializer(data=objs, many=True)
+                outputs.is_valid()
+                return Response(data=outputs.data, status=rest_status.HTTP_201_CREATED)
+            serializer.errors()
+        except Exception as err:
+            logger.exception(f'Error while posting many, {err}.')
+            return Response(serializer.errors, status=rest_status.HTTP_400_BAD_REQUEST)
 
 class UserViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     """
@@ -463,7 +493,7 @@ class AutoloaderGridViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraAct
         return Response(data=serializer.data)
 
 
-class AtlasModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActionsMixin):
+class AtlasModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActionsMixin, TargetRouteMixin):
     """
     API endpoint that allows Atlases to be viewed or edited.
     """
@@ -487,7 +517,7 @@ class SquareModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraAction
     permission_classes = [permissions.IsAuthenticated, HasGroupPermission]
     filterset_fields = ['grid_id', 'grid_id__meshMaterial', 'grid_id__holeType', 'grid_id__meshSize', 'grid_id__quality',
                         'atlas_id', 'selected', 'grid_id__session_id', 'status']
-    detailed_serializer = DetailedSquareSerializer
+    detailed_serializer = DetailedFullSquareSerializer
 
     @ action(detail=True, methods=['get'])
     def load(self, request, **kwargs):

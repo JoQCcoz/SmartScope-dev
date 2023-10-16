@@ -36,8 +36,8 @@ class GridIO:
         return working_dir
 
     @staticmethod
-    def create_grid_directories(session,grid) -> None:
-        path = Path(worker.AUTOSCREENDIR, session.working_dir, grid.directory)
+    def create_grid_directories(directory) -> None:
+        path = Path(worker.AUTOSCREENDIR, directory)
         for directory in [path, path / 'raw', path / 'pngs']:
             directory.mkdir(parents=True,exist_ok=True)
         return path

@@ -70,7 +70,7 @@ class Target:
             return
         self._y = value
 
-    def set_area_radius(self, shape_type):
+    def set_area_radius(self):
 
         len1 = int(self.shape[2] - self.shape[0])
         len2 = int(self.shape[3] - self.shape[1])
@@ -84,6 +84,11 @@ class Target:
         self.radius = min(len1, len2) / 2
             # self.area = np.pi * (self.radius ** 2)
 
+    def set_stage_coords(self, x,y,z):
+        self.stage_x = x
+        self.stage_y = y
+        self.stage_z = z
+
     def convert_image_coords_to_stage(self, montage):
         tile, dist = ProcessImage.closest_node(
             self.coords.reshape(-1,2),
@@ -95,3 +100,13 @@ class Target:
             montage.metadata.iloc[tile].TiltAngle
         )
         self.stage_z = montage.stage_z
+
+    def to_dict(self):
+        return dict(x=self.x,
+                    y=self.y,
+                    quality= self.quality,
+                    area= self.area,
+                    radius = self.radius,
+                    stage_x= self.stage_x,
+                    stage_y=self.stage_y,
+                    stage_z=self.stage_z)

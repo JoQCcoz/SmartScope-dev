@@ -14,7 +14,7 @@ from asgiref.sync import async_to_sync
 
 from Smartscope.server.api.models import *
 # from Smartscope.core.run_grid import load_multishot_from_file
-from Smartscope.server.api.serializers import update_to_fullmeta, SvgSerializer
+from Smartscope.server.api.serializers.serializers import update_to_fullmeta, SvgSerializer
 
 logger = logging.getLogger(__name__)
 

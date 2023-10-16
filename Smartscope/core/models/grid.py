@@ -9,7 +9,6 @@ class AutoloaderGrid(SmartscopeBaseModel):
 
     position: int
     name: str
-    uid:str = Field(alias='grid_id')
     session_id: str
     holeType:str
     meshSize:str
