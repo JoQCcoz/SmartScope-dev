@@ -1,7 +1,7 @@
 $(document).ready(async function () {
 
     checkState()
-    await loadSidePanelState()
+    // await loadSidePanelState()
     pushState()
     selected()
 })

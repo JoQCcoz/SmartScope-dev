@@ -27,17 +27,17 @@ function selected() {
 
 
 
-async function loadSidePanelState() {
-    await loadSidePanel(null, null, push = false)
-    for (const [key, val] of Object.entries(currentState)) {
-        // console.log(`${key}, ${val}`)
-        if (['group', 'session_id'].includes(key) && val !== undefined) {
-            await loadSidePanel(key, val, push = false)
-        } else if (key == 'grid_id') {
-            await loadReport(key, val, push = false)
-        }
-    }
-}
+// async function loadSidePanelState() {
+//     await loadSidePanel(null, null, push = false)
+//     for (const [key, val] of Object.entries(currentState)) {
+//         // console.log(`${key}, ${val}`)
+//         if (['group', 'session_id'].includes(key) && val !== undefined) {
+//             await loadSidePanel(key, val, push = false)
+//         } else if (key == 'grid_id') {
+//             await loadReport(key, val, push = false)
+//         }
+//     }
+// }
 
 function pushState() {
     var string = "?"
@@ -177,24 +177,24 @@ function checkState() {
     console.log(currentState)
 }
 
-async function loadSidePanel(requestfield = null, id = null, push = true) {
-    const loadInto = { 'group': 'sidebarSessions', 'session_id': 'sidebarGrids' }
-    var loadinto = 'sidebarGroups'
-    var url = "/api/sidepanel/"
-    if (requestfield !== null) {
-        url += `?${requestfield}=${id}`
-        currentState[requestfield] = id
-        loadinto = loadInto[requestfield]
-    }
-    console.log(url, push)
-    let models = await fetchAsync(url, message=`Loading ${requestfield}.`)
-    $(`#${loadinto}`).html(models)
+// async function loadSidePanel(requestfield = null, id = null, push = true) {
+//     const loadInto = { 'group': 'sidebarSessions', 'session_id': 'sidebarGrids' }
+//     var loadinto = 'sidebarGroups'
+//     var url = "/api/sidepanel/"
+//     if (requestfield !== null) {
+//         url += `?${requestfield}=${id}`
+//         currentState[requestfield] = id
+//         loadinto = loadInto[requestfield]
+//     }
+//     console.log(url, push)
+//     let models = await fetchAsync(url, message=`Loading ${requestfield}.`)
+//     $(`#${loadinto}`).html(models)
 
-    if (push) {
-        pushState()
-        selected()
-    }
-}
+//     if (push) {
+//         pushState()
+//         selected()
+//     }
+// }
 
 async function loadReport(requestfield = null, id = null, push = true) {
     console.log(`Loading report for grid: ${requestfield}, ${id}, ${push}`)
@@ -216,7 +216,7 @@ async function loadReport(requestfield = null, id = null, push = true) {
     if (push) {
         console.log('Pushing state')
         pushState()
-        selected()
+        // selected()
     }
     $(`#main`).html(report)
     if (typeof csrftoken == 'undefined') {

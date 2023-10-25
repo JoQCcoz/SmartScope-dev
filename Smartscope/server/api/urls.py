@@ -29,6 +29,6 @@ urlpatterns = [
     path('updatetargets/', UpdateTargetsView.as_view()),
     path('addtargets/', AddTargets.as_view()),
     path('sidepanel/', SidePanel.as_view()),
-    path('report/', ReportPanel.as_view()),
+    path('report/', ReportPanel.as_view(),),
     # path('squares', SquareListView.as_view())
 ]

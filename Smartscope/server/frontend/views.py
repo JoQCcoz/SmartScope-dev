@@ -514,7 +514,7 @@ class CollectionStatsView(TemplateView):
         context = self.get_context_data(grid_id, **kwargs)
         return render(request,self.template_name, context)
     
-def getUsersInGroup(request):
+def get_users_in_group(request):
     group = request.GET.get('group',None)
     if group is None:
         return HttpResponse('Group not specified')
@@ -523,10 +523,62 @@ def getUsersInGroup(request):
 
     return render(request, "general/options_fields.html", {"options": options})
 
-def getMicroscopeDetectors(request):
+def get_microscope_detectors(request):
     microscope = request.GET.get('microscope_id',None)
     if microscope is None:
         return HttpResponse('Microscope not specified')
     detectors = Detector.objects.filter(microscope_id=microscope)
     options = [{"value":d.pk,"field":d} for d in detectors]
     return render(request, "general/options_fields.html", {"options": options})
+
+def navigation_filters(request):
+    logger.debug(request.__dict__)
+    return render(request=request,template_name='autoscreenViewer/navigation_filters.html',context={'data':request.COOKIES})
+
+def render_sidepanel(request,items,cookie_name,url=None,component=None):
+    return render(request=request,template_name='autoscreenViewer/sidepanel.html',context={'items':items, 'url': url, 'component':component, 'cookie_name':cookie_name})
+
+def get_groups(request):
+    group = request.GET.get('group',None)
+    user = request.user
+    if user.is_staff:
+        items = Group.objects.all().exclude(name='viewer_only')
+    else:
+        items = list(user.groups.all().exclude(name='viewer_only'))
+    return render_sidepanel(request=request,items=items,url=reverse('getSessions'),component='#sidebarSessions',cookie_name='group')
+
+def get_sessions(request):
+    group = request.COOKIES.get('group',None)
+    items = list(ScreeningSession.objects.filter(group__pk=group).order_by('-date'))
+    return render_sidepanel(request=request,items=items,url=reverse('getGrids'),component='#sidebarGrids',cookie_name='session')
+
+def get_grids(request):
+    session = request.COOKIES.get('session',None)
+    items = list(AutoloaderGrid.objects.filter(session_id__pk=session).order_by('position'))
+    return render_sidepanel(request=request,items=items,cookie_name='grid')
+
+# def get_report(request):
+#     # smartscopeServerLog.info(request.query_params)
+#     grid_id = request.COOKIES.get('grid')
+#     logger.debug(request.__dict__)
+#     grid = AutoloaderGrid.objects.get(grid_id=grid_id)
+#     user = request.user
+#     user_groups = list(user.groups.values_list('pk', flat=True))
+#     group = grid.session_id.group
+#     logger.debug(f"Group={group.pk}, {user_groups}")
+
+#     if user.is_staff or group.pk in user_groups:
+#         context = dict()
+#         context['grid'] = grid
+#         context['gridform'] = AutoloaderGridReportForm(instance=context['grid'])
+#         context['gridCollectionParamsForm'] = GridCollectionParamsForm(instance=context['grid'].params_id, grid_id=context['grid'].grid_id)
+#         context['useMicroscope'] = settings.USE_MICROSCOPE
+#         try:
+#             context['atlas_id'] = context['grid'].atlasmodel_set.all().first().atlas_id
+#         except:
+#             context['atlas_id'] = None
+#         # self.directory = context['grid'].directory
+
+#         return render(request=request,template_name='autoscreenViewer/report.html',context=context)
+#     else:
+#         return HttpResponse(f'Sorry, {user} is not allowed to view this content.')

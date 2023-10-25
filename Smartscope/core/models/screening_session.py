@@ -6,8 +6,6 @@ from .custom_paths import CustomUserPath, CustomGroupPath
 from Smartscope.lib.image.smartscope_storage import SmartscopeStorage
 from Smartscope import __version__ as SmartscopeVersion
 
-# from .microscope import Microscope
-# from .detector import Detector
 logger = logging.getLogger(__name__)
 
 class ScreeningSessionManager(models.Manager):

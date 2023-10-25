@@ -1,0 +1,13 @@
+{% extends "general/left_sidebar.html" %}
+{% load static %}
+{% block title %}Filters{% endblock %}
+{% block sidebar_content %}
+<form>
+    <div class="input-group">
+        <label for="mygrids" class="input-group-text">My Grids</label>
+        <div class="input-group-text">
+            <input type="checkbox" id="mygrids" name="mygrids" class="form-check-input">
+        </div>
+    </div>
+</form>
+{% endblock %}

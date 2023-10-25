@@ -36,11 +36,13 @@
 
             <div class="sidebar sidebar-collapse sidebar-expand-md collapse collapse-horizontal show" id="sidebarNav">
                 <ul class="list-group sticky-top sticky-offset">
+                    <li id="filters" hx-get="{% url 'navigationFilters' %}" hx-target="#main"  hx-swap="beforeend"  
+                        class="list-group-item sidebar-separator-title text-muted d-flex align-items-center menu-collapsed justify-content-between">Filter <i class="bi bi-funnel"></i></li>
                     <li id="groups"
                         class="list-group-item sidebar-separator-title text-muted d-flex align-items-center menu-collapsed">
                         GROUPS
                     </li>
-                    <div id="sidebarGroups" style='max-height: 25vh; overflow: auto;'>
+                    <div id="sidebarGroups" style='max-height: 25vh; overflow: auto;' hx-get="{% url 'getGroups' %}" hx-target="#sidebarGroups" hx-trigger="load">
                     </div>
 
                     <li id="sessions"
@@ -49,7 +51,6 @@
                     </li>
                     <div id="sidebarSessions" style='max-height: 25vh; overflow: auto;'>
                     </div>
-
 
                     <li id="grids"
                         class="list-group-item sidebar-separator-title text-muted d-flex align-items-center menu-collapsed">
@@ -63,9 +64,9 @@
         <div id='main' class="col-12 col-md-10 d-flex flex-column" 
             style="background-color: #f5f5f5; overflow-y: scroll;"></div>
     </div>
+
     
 {% endblock content %}
-
 {% block script %}
 <script src="{% static 'browser.js' %}"></script>
 {% endblock script %}

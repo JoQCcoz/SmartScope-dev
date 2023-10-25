@@ -1,0 +1,20 @@
+{% for item in items %}
+<a class="bg-dark list-group-item list-group-item-action h-100" id="{{item.pk}}" href="#"
+    _="on click 
+        halt the event 
+        set cookies.{{cookie_name}} to '{{item.pk}}'
+        log .active in closest <div/>
+        remove .active from .active in closest <div/>
+        add .active
+        {% if url %}
+        fetch {{url}}
+        put the result into {{component}}
+        {% else %}
+        call loadReport('grid_id','{{item.pk}}')
+        {% endif %}
+        ">
+    <div class="d-flex w-100 justify-content-start align-items-center {{item.extraCSS}}">
+        <span class="menu-collapsed">{{ item }}</span>
+    </div>
+</a>
+{% endfor %}

@@ -10,6 +10,11 @@ from . import views
 urlpatterns = [
     path('', RedirectView.as_view(url='browse/'), name=''),
     path('browse/', views.AutoScreenViewer.as_view(), name='browser'),
+    path('browse/filters/', views.navigation_filters, name='navigationFilters'),
+    path('browse/getgroups/', views.get_groups, name='getGroups'),
+    path('browse/getsessions/', views.get_sessions, name='getSessions'),
+    path('browse/getgrids/', views.get_grids, name='getGrids'),
+    # path('browse/getreport/', views.get_report, name='getReport'),
     path('evaluatemicrographs/', views.EvaluateMicrographs.as_view(), name='evaluatemicrographs'),
     path('multishot/', views.MultiShotView.as_view(),name='setMultishot'),
     path('multishot/<grid_id>', views.MultiShotView.as_view(),name='setMultishot'),
@@ -28,8 +33,8 @@ if settings.USE_MICROSCOPE:
     urlpatterns += [
         path('run/', RedirectView.as_view(url='setup/'), name='run'),
         path('run/setup/', views.AutoScreenSetup.as_view(), name='setup_autoscreen'),
-        path('run/setup/getusers/', views.getUsersInGroup, name='getUsersInGroup'),
-        path('run/setup/getdetectors/', views.getMicroscopeDetectors, name='getMicroscopeDetectors'),
+        path('run/setup/getusers/', views.get_users_in_group, name='getUsersInGroup'),
+        path('run/setup/getdetectors/', views.get_microscope_detectors, name='getMicroscopeDetectors'),
         path('run/session/', views.AutoScreenRun.as_view(), name='run_autoscreen'),
         path('run/session/<session_id>/', views.AutoScreenRun.as_view(), name='run_session'),
     ]
