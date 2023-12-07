@@ -33,9 +33,5 @@ PROTOCOL_COMMANDS_FACTORY = get_protocol_commands(EXTERNAL_PLUGINS_LIST)
 
 DEFAULT_PREPROCESSING_PIPELINE = [ SMARTSCOPE_CUSTOM_CONFIG / 'default_preprocessing.json', SMARTSCOPE_DEFAULT_CONFIG / 'default_preprocessing.json' ]
 
-API_KEY = '60f0d6682b39301e7714d43ad1eb2fe83f00a5e9'
-API_BASE_URL = 'http://nginx:80/api/'
-
-
 AUTOSCREENDIR = os.getenv('AUTOSCREENDIR')
 TEMPDIR = os.getenv('TEMPDIR')

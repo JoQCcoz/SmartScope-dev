@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 from .interfaces.microscope import Detector, AtlasSettings, Microscope
 from .interfaces.microscope_methods import select_microscope_interface
 # from Smartscope.server.api.models import 
-from . import models
-from .api_interface import rest_api_interface as restAPI
+from smartscope_connector import models
+from smartscope_connector.api_interface import rest_api_interface as restAPI
 from . import flagfiles
 from .grid.grid_status import GridStatus
 

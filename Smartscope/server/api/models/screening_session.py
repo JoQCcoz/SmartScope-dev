@@ -91,6 +91,10 @@ class ScreeningSession(BaseModel):
         cwd = find_screening_session(root_directories(self),self.working_directory)
         cache.set(cache_key,cwd,timeout=10800)
         return cwd
+<<<<<<< HEAD
+=======
+    
+>>>>>>> fix 0.9.2 merge and decouple restapi-connector
 
     @property
     def stop_file(self):
@@ -107,9 +111,9 @@ class ScreeningSession(BaseModel):
         return self.autoloadergrid_set.all().order_by('position')\
             .exclude(status='complete').first()
 
-    @property
-    def storage(self):
-        return os.path.join(settings.AUTOSCREENSTORAGE, self.working_dir)
+    # @property
+    # def storage(self):
+    #     return os.path.join(settings.AUTOSCREENSTORAGE, self.working_dir)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -117,15 +121,18 @@ class ScreeningSession(BaseModel):
             if not self.date:
                 self.date = datetime.today().strftime('%Y%m%d')
             self.session_id = generate_unique_id(extra_inputs=[self.date, self.session])
+    
+    @property
+    def working_directory(self):
+        return f'{self.date}_{self.session}'
 
     def save(self, *args, **kwargs):
         self.session = self.session.replace(' ', '_')
         if not self.version:
             self.version = SmartscopeVersion
-        self.working_dir = os.path.join(self.group.name, f'{self.date}_{self.session}')
         super().save(*args, **kwargs)
         return self
 
     def __str__(self):
-        return f'{self.date}_{self.session}'
+        return self.working_directory
 

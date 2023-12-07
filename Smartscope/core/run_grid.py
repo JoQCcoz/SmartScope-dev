@@ -7,7 +7,7 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-from . import models
+from smartscope_connector import models
 from . import flagfiles
 
 from .grid.grid_status import GridStatus
@@ -19,7 +19,7 @@ from .grid.run_io import get_file_and_process, load_montage
 # from .grid.run_hole import RunHole
 
 from .interfaces.microscope_interface import MicroscopeInterface
-from .api_interface import rest_api_interface as restAPI
+from smartscope_connector.api_interface import rest_api_interface as restAPI
 
 from Smartscope.core.selectors import selector_wrapper
 

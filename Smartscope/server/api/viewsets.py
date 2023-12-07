@@ -34,7 +34,7 @@ from Smartscope.server.lib.worker_jobs import send_to_worker
 from .models.models_actions import targets_methods
 from Smartscope.core.db_manipulations import viewer_only
 from Smartscope.core.cache import save_json_from_cache
-from Smartscope.core.models import *
+from .models import *
 from Smartscope.core.main_commands import check_pause
 
 logger = logging.getLogger(__name__)
