@@ -15,7 +15,7 @@ from Smartscope.lib.image.smartscope_storage import SmartscopeStorage
 from Smartscope.server.frontend.forms import *
 from Smartscope.server.lib.worker_jobs import send_to_worker
 from Smartscope.core.db_manipulations import update, update_target_selection, update_target_label, update_target_status
-from Smartscope.core.models import *
+from .models import *
 from .serializers import *
 
 

@@ -1,6 +1,6 @@
 import logging
-from Smartscope.core.models import AtlasModel, AutoloaderGrid
-from ..api_interface import rest_api_interface as restAPI
+from smartscope_connector.models import AtlasModel, AutoloaderGrid
+from smartscope_connector.api_interface import rest_api_interface as restAPI
 from ..status import status
 
 logger = logging.getLogger(__name__)

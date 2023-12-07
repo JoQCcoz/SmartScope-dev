@@ -9,6 +9,7 @@ from Smartscope.server.api.models.detector import Detector
 from Smartscope.server.api.models.hole_type import HoleType
 from Smartscope.server.api.models.mesh import MeshSize, MeshMaterial
 from Smartscope.server.api.models.microscope import Microscope
+from Smartscope.server.api.models.custom_paths import CustomUserPath, CustomGroupPath
 # from Smartscope.core.models.screening_session import ScreeningSession
 # from Smartscope.core.models.target import Finder, Classifier
 

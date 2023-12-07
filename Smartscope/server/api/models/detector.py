@@ -44,7 +44,7 @@ class Detector(BaseModel):
             'Search mag. Similar to the Shift to Marker offset. Does not do anything at this time.'
     )
     frame_align_cmd = models.CharField(max_length=30, default='alignframes')
-    gain_rot = models.IntegerField(default=0)
+    gain_rot = models.IntegerField(default=0, null=True)
     gain_flip = models.BooleanField(default=True)
     energy_filter = models.BooleanField(default=False)
     frames_windows_directory = models.CharField(

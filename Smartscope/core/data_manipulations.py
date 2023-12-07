@@ -3,8 +3,8 @@ from typing import List, Optional
 import logging
 import random
 from Smartscope.lib.image.target import Target
-from Smartscope.lib.Datatypes.querylist import QueryList
-from . import models
+from smartscope_connector.Datatypes.querylist import QueryList
+from smartscope_connector import models
 
 logger = logging.getLogger(__name__)
 

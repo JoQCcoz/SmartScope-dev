@@ -14,6 +14,7 @@ from django.db.models.signals import post_save, pre_save
 from Smartscope.server.lib.worker_jobs import *
 from Smartscope.core.status import status
 from Smartscope.core.grid.grid_status import GridStatus
+from .screening_session import root_directories
 from .session import *
 from .misc_func import get_fields
 
@@ -23,28 +24,36 @@ logger = logging.getLogger(__name__)
 @receiver(pre_save, sender=SquareModel)
 @receiver(pre_save, sender=HoleModel)
 def pre_update(sender, instance, **kwargs):
-    if not instance._state.adding:
-        original = sender.objects.get(pk=instance.pk)
-        for new, old in zip(get_fields(instance), get_fields(original)):
-            if new == old:
-                return instance
-            col, new_val = new
-            old_val = old[1]
-            if col == 'selected':
-                change = ChangeLog(date=timezone.now(), table_name=instance._meta.db_table, grid_id=instance.grid_id, line_id=instance.pk,
-                                    column_name=col, initial_value=old_val.encode(), new_value=new_val.encode())
-                change.save()
-            elif col == 'quality':
-                items = ChangeLog.objects.filter(table_name=instance._meta.db_table, grid_id=instance.grid_id, line_id=instance.pk,
-                                                    column_name=col)
-                logger.debug([item.__dict__ for item in items])
-                change, created = ChangeLog.objects.get_or_create(table_name=instance._meta.db_table, grid_id=instance.grid_id, line_id=instance.pk,
-                                                                    column_name=col)
-                change.date = timezone.now()
-                change.new_value = new_val.encode()
-                if created:
-                    change.initial_value = old_val.encode()
-                change.save()
+    if instance._state.adding:
+        return instance
+    original = sender.objects.get(pk=instance.pk)
+    for new, old in zip(get_fields(instance), get_fields(original)):
+        if new == old:
+            continue
+        col, new_val = new
+        old_val = old[1]
+        if col == 'selected':
+            change = ChangeLog(date=timezone.now(), table_name=instance._meta.db_table, grid_id=instance.grid_id, line_id=instance.pk,
+                                column_name=col, initial_value=old_val.encode(), new_value=new_val.encode())
+            change.save()
+            continue
+        if col == 'quality':
+            items = ChangeLog.objects.filter(table_name=instance._meta.db_table, grid_id=instance.grid_id, line_id=instance.pk,
+                                                column_name=col)
+            logger.debug([item.__dict__ for item in items])
+            change, created = ChangeLog.objects.get_or_create(table_name=instance._meta.db_table, grid_id=instance.grid_id, line_id=instance.pk,
+                                                                column_name=col)
+            change.date = timezone.now()
+            change.new_value = new_val.encode()
+            if created:
+                change.initial_value = old_val.encode()
+            change.save()
+            continue
+        if col == 'status':
+            if old_val == status.SKIPPED and new_val != status.QUEUED:
+                instance.status = status.SKIPPED
+                logger.debug(f'Changing status of {instance} from to {status.SKIPPED}')   
+            continue
     return instance
 
 
@@ -117,7 +126,7 @@ def create_group_directory(sender, instance, created, *args, **kwargs):
             ltwd = os.path.join(settings.AUTOSCREENSTORAGE, instance.name)
         for d in [wd, ltwd]:
             if d is not None and not os.path.isdir(d):
-                logger.ifno(f'Creating group dir at: ', d)
+                logger.info(f'Creating group dir at: ', d)
                 os.mkdir(d)
 
 @ receiver(pre_save, sender=ScreeningSession)
@@ -135,9 +144,10 @@ def change_group(sender, instance, **kwargs):
 @receiver(post_save, sender=ScreeningSession)
 def create_session_scope_directory(sender, instance, created, *args, **kwargs):
     if created:
-        logger.debug(f'Creating session {instance} directories')
+        directory = Path(root_directories(instance)[0], instance.working_directory)
+        logger.debug(f'Creating session {instance} directory at {directory}')
         create_scope_dirs(instance.microscope_id.scope_path)
-        Path(instance.directory).mkdir(parents=True, exist_ok=True)
+        directory.mkdir(parents=True, exist_ok=True)
 
 @receiver(post_save, sender=Microscope)
 def create_scope_directory(sender, instance, created, *args, **kwargs):
