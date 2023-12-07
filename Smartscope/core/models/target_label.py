@@ -22,7 +22,7 @@ class Classifier(TargetLabel):
     label: str
 
 class Selector(TargetLabel):
-    label:str
     value: float
+    label:Optional[str] = None
 
 

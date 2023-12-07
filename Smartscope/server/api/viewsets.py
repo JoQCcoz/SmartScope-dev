@@ -499,6 +499,7 @@ class AtlasModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActions
     """
     queryset = AtlasModel.objects.all()
     serializer_class = AtlasSerializer
+    detailed_serializer = DetailedFullAtlasSerializer
     permission_classes = [permissions.IsAuthenticated]
     filterset_fields = ['grid_id', 'grid_id__meshMaterial', 'grid_id__holeType',
                         'grid_id__meshSize', 'grid_id__quality', 'grid_id__session_id', 'status']

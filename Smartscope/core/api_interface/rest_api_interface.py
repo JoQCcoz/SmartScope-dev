@@ -44,6 +44,7 @@ def generate_get_single_url(object_id:str, base_url:str=API_BASE_URL, route:str=
 
 
 def get_from_API(url, auth_header:Dict=AUTH_HEADER) -> requests.Response:
+    logger.debug(f'Getting from API at url {url}')
     response = requests.get(url,headers=auth_header)
     if response.status_code != 200:
         raise RequestUnsuccessfulError(response)
@@ -68,8 +69,8 @@ def get_single(object_id,output_type:SmartscopeBaseModel, auth_header:Dict=AUTH_
     return response.json()
 
 @parse_output
-def get_many(output_type:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER, **filters) -> QueryList[SmartscopeBaseModel]:
-    url = generate_get_url(route=output_type.api_route,filters=filters)
+def get_many(output_type:SmartscopeBaseModel, auth_header:Dict=AUTH_HEADER,route_suffixes:List[str]=[], **filters) -> QueryList[SmartscopeBaseModel]:
+    url = generate_get_url(route=output_type.api_route,filters=filters, route_suffixes=route_suffixes)
     response =  get_from_API(url, auth_header)
     return response.json()
 

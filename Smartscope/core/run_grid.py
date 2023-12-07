@@ -21,7 +21,7 @@ from .grid.run_io import get_file_and_process, load_montage
 from .interfaces.microscope_interface import MicroscopeInterface
 from .api_interface import rest_api_interface as restAPI
 
-# from Smartscope.core.selectors import selector_wrapper
+from Smartscope.core.selectors import selector_wrapper
 
 # from Smartscope.server.api.models import SquareModel
 from Smartscope.core.settings import worker
@@ -121,7 +121,7 @@ def run_grid(
             montage,
             protocol.atlas.targets.finders
         )
-        targets = add_targets(
+        atlas.targets = add_targets(
             targets=targets,
             model=models.SquareModel,
             finder=finder_method,
@@ -131,14 +131,18 @@ def run_grid(
         )
         logger.debug(f'Added {len(targets)} squares to atlas.')
         logger.debug(targets[0])
-        targets = restAPI.post_many(instances=targets, output_type=models.SquareModel, route_suffixes=['add_targets'])
+        atlas.targets = restAPI.post_many(instances=atlas.targets, output_type=models.SquareModel, route_suffixes=['add_targets'])
         atlas = restAPI.update(atlas,
             status=status.TARGETS_PICKED)
 
     if atlas.status == status.TARGETS_PICKED:
-        selector_wrapper(protocol.atlas.targets.selectors, atlas, n_groups=5)
-        select_n_areas(atlas, grid.params_id.squares_num)
-        atlas = restAPI.update(atlas, status=status.COMPLETED)
+        logger.debug(f'Atlas has {len(atlas.targets)} targets')
+        atlas = selector_wrapper(protocol.atlas.targets.selectors, atlas, n_groups=5)
+        logger.debug(atlas.targets[0].selectors)  
+        # select_n_areas(atlas, grid.params_id.squares_num)
+        # atlas = restAPI.update(atlas, status=status.COMPLETED)
+    return
+
     logger.info('Atlas analysis is complete')
     return
     running = True

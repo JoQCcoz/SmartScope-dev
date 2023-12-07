@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List, Optional, Union
 from Smartscope.core.settings.worker import PLUGINS_FACTORY
 from .base_model import SmartscopeBaseModel
-from pydantic import Field
+from pydantic import Field, field_validator
 from Smartscope.core.status import status
 from Smartscope.lib.Datatypes.querylist import QueryList
 from .target_label import Finder, Classifier, Selector
@@ -22,10 +22,18 @@ class Target(SmartscopeBaseModel):
     status:Union[str,None] = status.NULL
     
     completion_time: Optional[datetime] = None
-    targets: List['Target'] = Field(default_factory=list)
+    targets: List = Field(default_factory=list)
     finders: List[Finder] = Field(default_factory=list)
     classifiers: List[Classifier] = Field(default_factory=list)
     selectors: List[Selector] = Field(default_factory=list)
+
+    @field_validator('finders','classifiers','selectors', mode='before')
+    @classmethod
+    def validate_target_labels(cls, v):
+        print(f'Validating target labels, {v}')
+        if v is None:
+            return []
+        return v
 
     @property
     def group(self):

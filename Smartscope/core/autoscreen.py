@@ -39,7 +39,7 @@ def autoscreen(session_id:str):
     flagfiles.write_session_lock(session.uid, microscope.lock_file)
 
     try:
-        grids = restAPI.get_many(models.AutoloaderGrid)
+        grids = restAPI.get_many(models.AutoloaderGrid, session_id=session.uid)
         # logger.info(f'Process: {process}')
         logger.info(f'Session: {session}')
         logger.info(f"Grids: {', '.join([grid.__str__() for grid in grids])}")

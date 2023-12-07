@@ -6,7 +6,7 @@ from Smartscope.lib.Datatypes.models import generate_unique_id
 from Smartscope.core.status import status
 
 from .base_model import SmartscopeBaseModel
-from .target import Target
+from .square import SquareModel
 from .extra_property_mixin import ExtraPropertyMixin
 
 
@@ -26,7 +26,7 @@ class AtlasModel(SmartscopeBaseModel, ExtraPropertyMixin):
     stage_z: Optional[float] = None
     status: Optional[str] = None
     completion_time: Optional[datetime] = None
-    targets: List['Target'] = Field(default_factory=list)
+    targets: List[SquareModel] = Field(default_factory=list)
 
     class Meta(SmartscopeBaseModel.Meta):
         api_route = 'atlas'
