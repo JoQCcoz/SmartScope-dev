@@ -633,8 +633,9 @@ async function reportMain() {
     populateReportHead()
     // renderCounts()
     if (fullmeta.status != null) {
-        console.log(fullmeta.atlas[Object.keys(fullmeta.atlas)[0]].status)
-        if (fullmeta.atlas[Object.keys(fullmeta.atlas)[0]].status == 'completed') {
+        let status = fullmeta.atlas[Object.keys(fullmeta.atlas)[0]].status
+        console.log(status)
+        if (status == 'completed' || status == 'targets_picked') {
             await loadAtlas(metaonly = false, display_type = currentState['atlasDisplayType'] || null, method = currentState['atlasMethod'] || null);
             if (![null, undefined].includes(currentState.square)) {
                 await loadSquare(currentState.square, metaonly = false, display_type = currentState['squareDisplayType'] || null, method = currentState['squareMethod'] || null)

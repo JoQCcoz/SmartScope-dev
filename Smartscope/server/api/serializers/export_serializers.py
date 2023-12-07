@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer, ListSerializer
 from rest_framework import serializers as drf_serializers
 from .. import models
-from .serializers import GridCollectionParamsSerializer, MicroscopeSerializer,DetectorSerializer
+from .serializers import GridCollectionParamsSerializer, MicroscopeSerializer,DetectorSerializer, SquareSerializer, HoleSerializer, HighMagSerializer, AtlasSerializer
 from .utils import extract_targets, create_target_label_instances
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
@@ -138,6 +138,19 @@ class DetailedFullSquareSerializer(TargetSerializer):
         target_model:models.BaseModel = models.SquareModel
         parent_model: models.BaseModel = models.AtlasModel
 
+class DetailedNoTargetSquareSerializer(TargetSerializer):
+    # targets = DetailedHoleSerializer(many=True, required=False)
+
+    class Meta:
+        model = models.SquareModel
+        fields = '__all__'
+        list_serializer_class = AddTargetsListSerializer
+
+    class Config:
+        id_alias:str = 'atlas_id'
+        target_model:models.BaseModel = models.SquareModel
+        parent_model: models.BaseModel = models.AtlasModel
+
 class DetailedAtlasSerializer(ModelSerializer):
     targets = DetailedSquareSerializer(many=True)
 
@@ -146,10 +159,11 @@ class DetailedAtlasSerializer(ModelSerializer):
         exclude = ['atlas_id','grid_id']
 
 class DetailedFullAtlasSerializer(ModelSerializer):
-    targets = DetailedSquareSerializer(many=True)
+    targets = DetailedNoTargetSquareSerializer(many=True)
 
     class Meta:
         model = models.AtlasModel
+        fields = '__all__'
 
     class Config:
         id_alias:str = 'atlas_id'

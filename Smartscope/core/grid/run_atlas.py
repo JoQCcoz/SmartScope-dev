@@ -10,7 +10,7 @@ class RunAtlas:
     @staticmethod
     def get_atlas(grid:AutoloaderGrid):
         logger.info(f'Getting atlas for grid {grid.name}')
-        atlas = restAPI.get_many(output_type=AtlasModel, grid_id=grid.uid).first()
+        atlas = restAPI.get_many(output_type=AtlasModel, grid_id=grid.uid, route_suffixes=['detailed']).first()
 
         if atlas is not None:
             logger.info(f'Found atlas')
