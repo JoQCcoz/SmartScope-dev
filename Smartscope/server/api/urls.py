@@ -33,6 +33,7 @@ urlpatterns = [
     path('addtargets/', AddTargets.as_view()),
     path('sidepanel/', SidePanel.as_view()),
     path('report/', ReportPanel.as_view()),
+    # path('getqueue/<grid_id>', get_queue),
     # path('squares', SquareListView.as_view())
 ]
 

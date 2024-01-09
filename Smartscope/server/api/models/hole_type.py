@@ -4,7 +4,8 @@
 from .base_model import *
 
 class HoleType(BaseModel):
-    name = models.CharField(max_length=100, primary_key=True)
+    holetype_id = models.CharField(max_length=30, blank=True, primary_key=True)
+    name = models.CharField(max_length=100, unique=True)
     hole_size = models.FloatField(null=True, blank=True, default=None)
     hole_spacing = models.FloatField(null=True, blank=True, default=None)
 
@@ -17,3 +18,7 @@ class HoleType(BaseModel):
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        self.holetype_id = self.name.replace('/', '_').replace(' ', '_').lower()
+        super().save(*args, **kwargs)

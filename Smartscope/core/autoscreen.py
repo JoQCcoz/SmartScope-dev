@@ -71,7 +71,7 @@ def autoscreen(session_id:str):
         logger.info('Stopping Smartscope.py autoscreen')
         status = 'killed'
     finally:
-        os.remove(microscope.lock_file)
+        flagfiles.remove_scope_lock_file(microscope.lock_file)
         # restAPI.update(process, status=status)
         logger.debug('Wrapping up')
         # processing_queue.put('exit')

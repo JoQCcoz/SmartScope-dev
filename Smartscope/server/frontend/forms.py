@@ -60,8 +60,8 @@ class AutoloaderGridForm(forms.ModelForm):
     class Meta:
         # from Smartscope.core.models.grid import AutoloaderGrid
         model = AutoloaderGrid
-        fields = ('name', 'position', 'holeType', 'meshSize', 'meshMaterial')
-        labels = dict(name='Name', position='Position', holeType='Hole Type', meshSize='Mesh Size', meshMaterial='Mesh Material')
+        fields = ('name', 'position', 'holetype_id', 'meshSize', 'meshMaterial')
+        labels = dict(name='Name', position='Position', holetype_id='Hole Type', meshSize='Mesh Size', meshMaterial='Mesh Material')
         exclude = ['session_id', 'quality', 'notes', 'last_update', 'status', 'params_id', 'hole_angle', 'mesh_angle', 'start_time']
         help_texts = dict(name='Use only [Aa-Zz], [1-9], _ and -', position='number must be between 1 and 12')
 

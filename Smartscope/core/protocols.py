@@ -11,7 +11,7 @@ def load_protocol(file:Path=Path('protocol.yaml')):
     if file.exists():
         with open(file) as f:
             return BaseProtocol.model_validate(yaml.safe_load(f))
-
+    # raise FileNotFoundError(f'Protocol file {file.absolute()} does not exist')
     # from Smartscope.lib.storage.temporary_s3_file import TemporaryS3File
     # if eval(os.getenv('USE_AWS')):
     #     with TemporaryS3File([file]) as temp:

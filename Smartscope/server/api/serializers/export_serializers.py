@@ -1,3 +1,4 @@
+from typing import List, Tuple, Union
 from rest_framework.serializers import ModelSerializer, ListSerializer
 from rest_framework import serializers as drf_serializers
 from .. import models
@@ -23,7 +24,6 @@ class DetailedDetectorSerializer(ModelSerializer):
     class Meta:
         model= models.Detector
         fields = '__all__'
-        # exclude = ['detector_id']
 
 
 class DetailedSessionSerializer(ModelSerializer):
@@ -59,44 +59,50 @@ class TargetSerializer(ModelSerializer):
 
     finders = FinderSerializer(many=True)
     selectors = SelectorSerializer(many=True, required=False)
-    classifiers = ClassifierSerializer(many=True)
+    classifiers = ClassifierSerializer(many=True, required=False)
 
     class Config:
         id_alias:str = 'NotImplemented'
         target_model:models.BaseModel = 'NotImplemented'
         parent_model: models.BaseModel = 'NotImplemented'
+        parent_id_alias:str = 'NotImplemented'
 
     def validate(self, attrs):
         return super().validate(attrs)
 
-    def create(self,validated_data):
-        instances = []
+    def create(self,validated_data, label_types: Union[List, '__all__']= '__all__'):
         labels = []
-        validated_data.pop('uid')
-        grid_id = models.AutoloaderGrid.objects.get(grid_id=validated_data.pop('grid_id'))
-        parent_id = self.Config.parent_model.objects.get(pk=validated_data.pop(self.Config.id_alias))
-        target_labels, validated_data, _ = extract_targets(validated_data)
-        instance = self.Meta.model(**validated_data, grid_id=grid_id, **{self.Config.id_alias:parent_id})
-        instances.append(instance)
+        uid = validated_data.pop('uid')
+        target_labels, validated_data, _ = extract_targets(validated_data, label_types= label_types)
+        
+        if uid is None:
+            grid_id = models.AutoloaderGrid.objects.get(grid_id=validated_data.pop('grid_id'))
+            parent_id = self.Config.parent_model.objects.get(pk=validated_data.pop(self.Config.parent_id_alias))
+            instance = self.Meta.model(**validated_data, grid_id=grid_id, **{self.Config.parent_id_alias:parent_id})
+            logger.debug(f'Created new instance with uid: {instance.pk}')
+        else: 
+            instance = self.Meta.model.objects.get(pk=uid)
+            logger.debug(f'Working on target with uid: {instance.pk}')
+       
         labels += create_target_label_instances(target_labels,instance.pk,ContentType.objects.get_for_model(self.Config.target_model))
-  
-        # for target in targets:
-        #     target_labels, validated_data, targets = extract_targets(target)
-        #     target = self.Config.target_model(**target, **{self.Config.id_alias:instance, 'grid_id':instance.grid_id})
-        #     to_create.append(target)
-        #     to_create += create_target_label_instances(target_labels,target.pk,ContentType.objects.get_for_model(self.Config.target_model))
-        return instances, labels
+        
+        return instance, labels
 
+    
 class AddTargetsListSerializer(ListSerializer):
 
-    def create(self, validated_data):
+    def create(self, validated_data, label_types = '__all__',):
         all_targets = []
         all_labels = []
         for target in validated_data:
-            instances, labels = self.child.create(target)
-            all_targets += instances
+            instance, labels = self.child.create(target, label_types=label_types)
+            all_targets.append(instance)
             all_labels += labels
         return all_targets, all_labels
+    
+    def update(self, validated_data):
+        for target in validated_data:
+            self.child.update(target)
 
 
 class DetailedHighMagSerializer(TargetSerializer):
@@ -112,6 +118,21 @@ class DetailedHoleSerializer(TargetSerializer):
         model = models.HoleModel
         exclude = ['hole_id','square_id','grid_id']
 
+
+class DetailedFullHoleSerializer(TargetSerializer):
+    targets = DetailedHighMagSerializer(many=True, required=False)
+
+    class Meta:
+        model = models.HoleModel
+        fields = '__all__'
+        list_serializer_class = AddTargetsListSerializer
+
+    class Config:
+        id_alias:str = 'hole_id'
+        target_model:models.BaseModel = models.HoleModel
+        parent_model: models.BaseModel = models.SquareModel
+        parent_id_alias:str = 'square_id'
+
 class ScipionPluginHoleSerializer(DetailedHoleSerializer):
     class Meta(DetailedHoleSerializer.Meta):
         exclude = []
@@ -126,7 +147,7 @@ class DetailedSquareSerializer(TargetSerializer):
         
 
 class DetailedFullSquareSerializer(TargetSerializer):
-    targets = DetailedHoleSerializer(many=True, required=False)
+    targets = DetailedFullHoleSerializer(many=True, required=False)
 
     class Meta:
         model = models.SquareModel
@@ -134,9 +155,10 @@ class DetailedFullSquareSerializer(TargetSerializer):
         list_serializer_class = AddTargetsListSerializer
 
     class Config:
-        id_alias:str = 'atlas_id'
+        id_alias:str = 'square_id'
         target_model:models.BaseModel = models.SquareModel
         parent_model: models.BaseModel = models.AtlasModel
+        parent_id_alias:str = 'atlas_id'
 
 class DetailedNoTargetSquareSerializer(TargetSerializer):
     # targets = DetailedHoleSerializer(many=True, required=False)
@@ -147,9 +169,10 @@ class DetailedNoTargetSquareSerializer(TargetSerializer):
         list_serializer_class = AddTargetsListSerializer
 
     class Config:
-        id_alias:str = 'atlas_id'
+        id_alias:str = 'square_id'
         target_model:models.BaseModel = models.SquareModel
         parent_model: models.BaseModel = models.AtlasModel
+        parent_id_alias:str = 'atlas_id'
 
 class DetailedAtlasSerializer(ModelSerializer):
     targets = DetailedSquareSerializer(many=True)

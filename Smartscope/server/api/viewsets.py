@@ -151,9 +151,12 @@ class TargetRouteMixin:
             raise ValueError(f'detailed_serializer attribute is not set on {self.__class__.__name__}.')
         return self.detailed_serializer
 
-    @ action(detail=True, methods=['get'], url_path='detailed')
+    @ action(detail=True, methods=['get','patch'], url_path='detailed')
     def detailedOne(self, request, *args, **kwargs):
         self.serializer_class = self.get_detailed_serializer()
+        if request.method == 'PATCH':
+            return self.detailed_patch(request=request, *args, **kwargs)
+
         obj = self.get_object()
         serializer = self.get_serializer(obj, many=False)
         return Response(data=serializer.data)
@@ -189,25 +192,50 @@ class TargetRouteMixin:
 
     @action(detail=False, methods=['post'])
     def add_targets(self, request, *args, **kwargs):
-        logger.debug('Received create_targets request')
+        logger.debug(f'Received create_targets request with params: {request.query_params}')
         self.serializer_class = self.get_detailed_serializer()
         serializer = self.get_serializer(data=request.data, many=True)
+        label_types = request.query_params.get('label_types', '__all__').split(',')
         try:
             logger.debug(request.data[0])
             if serializer.is_valid(raise_exception=True):
                 logger.debug(f'Valid!')
-                objs, labels = serializer.create(request.data)
+                objs, labels = serializer.create(request.data, label_types=label_types)
                 logger.debug(f'Created {len(objs)} objects')
                 with transaction.atomic():
                     objs = [obj.save() for obj in objs]
                     [label.save() for label in labels]
-                outputs = self.get_serializer(data=objs, many=True)
-                outputs.is_valid()
+                outputs = self.get_serializer(instance=objs, many=True)
+                # outputs.is_valid(raise_exception=True)
+                logger.debug(f'Ouputs:\n{outputs.data}')
                 return Response(data=outputs.data, status=rest_status.HTTP_201_CREATED)
             serializer.errors()
         except Exception as err:
             logger.exception(f'Error while posting many, {err}.')
             return Response(serializer.errors, status=rest_status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, methods=['patch'])    
+    def update_many(self,request, *args, **kwargs):
+        logger.debug('Received update_many request')
+        logger.debug(request.data)
+        data = request.data.copy()
+        uids = data.pop('uids')
+        objs = self.queryset.filter(pk__in=uids)
+        try:
+            with transaction.atomic():
+                for obj in objs:
+                    for key, value in data.items():
+                        setattr(obj, key, value)
+                    obj.save()
+            return Response(status=rest_status.HTTP_200_OK)
+        except Exception as err:
+            logger.exception(f'Error while updating many, {err}.')
+            return Response(err, status=rest_status.HTTP_400_BAD_REQUEST)
+        
+    def detailed_patch(self,request,*args,**kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+          
 
 class UserViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     """
@@ -428,6 +456,14 @@ class HoleTypeViewSet(viewsets.ModelViewSet, GeneralActionsMixin,):
     serializer_class = HoleTypeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+def get_queue(grid):
+    square = grid.squaremodel_set.filter(selected=True).\
+        exclude(status__in=[status.SKIPPED, status.COMPLETED]).\
+        order_by('number').first()
+    hole = grid.holemodel_set.filter(selected=True, square_id__status=status.COMPLETED).\
+        exclude(status__in=[status.SKIPPED, status.COMPLETED]).\
+        order_by('square_id__completion_time', 'number').first()
+    return square, hole
 
 class AutoloaderGridViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActionsMixin):
     """
@@ -436,7 +472,7 @@ class AutoloaderGridViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraAct
     queryset = AutoloaderGrid.objects.all()
     serializer_class = AutoloaderGridSerializer
     permission_classes = [permissions.IsAuthenticated, HasGroupPermission]
-    filterset_fields = ('session_id', 'holeType', 'meshSize', 'meshMaterial', 'quality', 'status')
+    filterset_fields = ('session_id', 'holetype_id', 'meshSize', 'meshMaterial', 'quality', 'status')
 
     @ action(detail=True, methods=['get'])
     def fullmeta(self, request, **kwargs):
@@ -491,6 +527,21 @@ class AutoloaderGridViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraAct
         self.serializer_class = ExportMetaSerializer
         serializer = self.get_serializer(obj, many=False)
         return Response(data=serializer.data)
+    
+
+    @action(detail=True, methods=['get'])
+    def get_queue(self,request, **kwargs):
+        obj = self.get_object()
+        if obj is None:
+            return Response({'error': f'Grid {obj} not found'}, status=404)
+        
+        square, hole = get_queue(obj)
+        
+        # Serialize the data if needed
+        square_data = DetailedFullSquareSerializer(square).data if square else None
+        hole_data = DetailedFullHoleSerializer(hole).data if hole else None
+        
+        return Response({'squaremodel': square_data, 'holemodel': hole_data})
 
 
 class AtlasModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActionsMixin, TargetRouteMixin):
@@ -501,7 +552,7 @@ class AtlasModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActions
     serializer_class = AtlasSerializer
     detailed_serializer = DetailedFullAtlasSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filterset_fields = ['grid_id', 'grid_id__meshMaterial', 'grid_id__holeType',
+    filterset_fields = ['grid_id', 'grid_id__meshMaterial', 'grid_id__holetype_id',
                         'grid_id__meshSize', 'grid_id__quality', 'grid_id__session_id', 'status']
 
     @ action(detail=True, methods=['get'])
@@ -516,7 +567,7 @@ class SquareModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraAction
     queryset = SquareModel.objects.all()
     serializer_class = SquareSerializer
     permission_classes = [permissions.IsAuthenticated, HasGroupPermission]
-    filterset_fields = ['grid_id', 'grid_id__meshMaterial', 'grid_id__holeType', 'grid_id__meshSize', 'grid_id__quality',
+    filterset_fields = ['grid_id', 'grid_id__meshMaterial', 'grid_id__holetype_id', 'grid_id__meshSize', 'grid_id__quality',
                         'atlas_id', 'selected', 'grid_id__session_id', 'status']
     detailed_serializer = DetailedFullSquareSerializer
 
@@ -574,10 +625,10 @@ class HoleModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActionsM
     queryset = HoleModel.objects.all()
     serializer_class = HoleSerializer
     permission_classes = [permissions.IsAuthenticated, HasGroupPermission]
-    filterset_fields = ['grid_id', 'grid_id__meshMaterial', 'grid_id__holeType', 'grid_id__meshSize', 'grid_id__quality', 'grid_id__session_id',
+    filterset_fields = ['grid_id', 'grid_id__meshMaterial', 'grid_id__holetype_id', 'grid_id__meshSize', 'grid_id__quality', 'grid_id__session_id',
                         'square_id', 'status', 'bis_group', 'bis_type']
 
-    detailed_serializer = DetailedHoleSerializer
+    detailed_serializer = DetailedFullHoleSerializer
 
     @ action(detail=True, methods=['get'])
     def load(self, request, **kwargs):
@@ -632,7 +683,7 @@ class HighMagModelViewSet(viewsets.ModelViewSet, GeneralActionsMixin, ExtraActio
     queryset = HighMagModel.objects.all()
     permission_classes = [permissions.IsAuthenticated, HasGroupPermission]
     serializer_class = HighMagSerializer
-    filterset_fields = ['grid_id', 'grid_id__meshMaterial', 'grid_id__holeType', 'grid_id__meshSize',
+    filterset_fields = ['grid_id', 'grid_id__meshMaterial', 'grid_id__holetype_id', 'grid_id__meshSize',
                         'grid_id__quality', 'hole_id', 'hole_id__square_id', 'grid_id__session_id', 'hm_id', 'number', 'status','name','frames']
 
     detailed_serializer = DetailedHighMagSerializer
