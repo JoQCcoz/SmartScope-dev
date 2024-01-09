@@ -21,13 +21,14 @@ class AutoloaderGrid(BaseModel):
         on_delete=models.CASCADE,
         to_field='session_id'
     )
-    holeType = models.ForeignKey(
-        HoleType,
-        null=True,
-        on_delete=models.SET_NULL,
-        to_field='name',
-        default=None
-    )
+    holetype_id = models.ForeignKey(HoleType, null=True, on_delete=models.SET_NULL)
+    # holeType = models.ForeignKey(
+    #     HoleType,
+    #     null=True,
+    #     on_delete=models.SET_NULL,
+    #     to_field='name',
+    #     default=None
+    # )
     meshSize = models.ForeignKey(
         MeshSize,
         null=True,

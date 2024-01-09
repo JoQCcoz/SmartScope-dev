@@ -35,7 +35,7 @@ function isNumber(n) {
 function fillFromPrevious(prev_num) {
     const curr_num = prev_num + 1
 
-    for (item of ['holeType', 'meshSize', "meshMaterial", 'protocol']) {
+    for (item of ['holetype_id', 'meshSize', "meshMaterial", 'protocol']) {
         var prevVal = $(`[name='${prev_num}-${item}']`).val()
 
         $(`[name='${curr_num}-${item}']`).val(prevVal)
@@ -66,7 +66,7 @@ $("#addGridbtn").on('click', function addGrid() {
     clonedDiv.attr("id", `grid-${val}`);
     console.log(origDiv, clonedDiv)
     origDiv.after(clonedDiv);
-    for (item of ['name', 'position', 'holeType', 'meshSize', 'meshMaterial', 'protocol']) {
+    for (item of ['name', 'position', 'holetype_id', 'meshSize', 'meshMaterial', 'protocol']) {
         clonedDiv.find(`[name$=-${item}]`).attr('name', `${val}-${item}`).attr('id', `id_${val}-${item}`)
     }
 

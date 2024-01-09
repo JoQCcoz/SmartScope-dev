@@ -100,10 +100,9 @@ class SquareModel(Target, ExtraPropertyMixin):
     def svg(self, display_type, method):
         from .hole import HoleModel
         from Smartscope.core.svg_plots import drawSquare
-
+        
         holes = list(HoleModel.display.filter(square_id=self.square_id))
         sq = drawSquare(self, holes, display_type, method)
-        
         return sq
 
     @property

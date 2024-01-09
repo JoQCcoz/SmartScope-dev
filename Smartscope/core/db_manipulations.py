@@ -53,7 +53,7 @@ def websocket_update(objs, grid_id):
 
 
 def update_target_selection(model:models.Model,objects_ids:List[str],value:str, *args, **kwargs):
-    from .models.hole import HoleModel
+    # from .models.hole import HoleModel
 
     status = None
     value = True if value == '1' else False
@@ -80,7 +80,7 @@ def update_target_selection(model:models.Model,objects_ids:List[str],value:str, 
             obj.save()  
 
 def update_target_label(model:models.Model,objects_ids:List[str],value:str,method:str, *args, **kwargs):
-    from .models.target_label import Classifier
+    # from .models.target_label import Classifier
 
     content_type = ContentType.objects.get_for_model(model)
     logger.debug('Updating Classifier objects')
@@ -103,7 +103,7 @@ def update_target_status(model:models.Model,objects_ids:List[str],value:str, *ar
 
 
 def set_or_update_refined_finder(object_id, stage_x, stage_y, stage_z):
-    from .models.target_label import Finder
+    # from .models.target_label import Finder
 
     refined = Finder.objects.filter(object_id=object_id, method_name='Recentering')
     if refined:
@@ -236,10 +236,10 @@ def update(instance, refresh_from_db=False, extra_fields=[], **kwargs):
 
 
 def add_targets(grid, parent, targets, model, finder, classifier=None, start_number=0, **extra_fields):
-    from .models.square import SquareModel
-    from .models.hole import HoleModel
-    from .models.high_mag import HighMagModel
-    from .models.target_label import Finder
+    # from .models.square import SquareModel
+    # from .models.hole import HoleModel
+    # from .models.high_mag import HighMagModel
+    # from .models.target_label import Finder
     output = []
     defaut_field_dict = dict(grid_id=grid, **extra_fields)
     if model is SquareModel:
@@ -278,7 +278,7 @@ def add_targets(grid, parent, targets, model, finder, classifier=None, start_num
 
 
 def add_high_mag(grid, parent):
-    from .models.high_mag import HighMagModel
+    # from .models.high_mag import HighMagModel
     
     hm, created = HighMagModel.objects.get_or_create(
         number=parent.number,

@@ -7,6 +7,7 @@ from .serializers.serializers import *
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import authentication, permissions
 from rest_framework.renderers import TemplateHTMLRenderer
@@ -228,3 +229,9 @@ class ReportPanel(APIView):
             return Response(context, content_type='html')
         else:
             return HttpResponse(f'Sorry, {user} is not allowed to view this content.')
+
+
+
+
+
+

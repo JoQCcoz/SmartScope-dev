@@ -50,9 +50,11 @@ class GridCollectionParamsSerializer(RESTserializers.ModelSerializer):
 
 
 class SessionSerializer(RESTserializers.ModelSerializer):
+    directory = RESTserializers.ReadOnlyField()
+
     class Meta:
         model = ScreeningSession
-        fields = '__all__'
+        exclude = ['working_dir']
 
 
 class AutoloaderGridSerializer(RESTserializers.ModelSerializer):
@@ -266,11 +268,21 @@ class SvgSerializer(RESTserializers.Serializer):
     #     with open(self.instance.svg, 'r') as f:
     #         return f.read().replace(f'{self.instance.name}.png', self.instance.png['url'])
 
-    def load_meta(self):
-        targets = self.instance.targets
-        if len(targets) == 0:
-            return dict()
-        return update_to_fullmeta(targets)
+    # def load_meta(self):
+    #     targets = self.instance.targets
+    #     if len(targets) == 0:
+    #         return dict()
+    #     return update_to_fullmeta(targets)
+    def svg(self):
+        from Smartscope.lib.Datatypes.base_plugin import SelectorSorter
+        from Smartscope.core.settings.worker import PLUGINS_FACTORY
+        if self.display_type != 'selectors':
+             return self.instance.svg(display_type=self.display_type, method=self.method,).as_svg()
+        from Smartscope.core.svg_plots import drawAtlasNew
+        sorter = SelectorSorter(PLUGINS_FACTORY[self.method], self.instance.targets, n_classes=5, from_server=True)
+        return drawAtlasNew(self.instance, sorter).as_svg()
+
+        return
 
     def to_representation(self, instance):
         return {
@@ -278,7 +290,7 @@ class SvgSerializer(RESTserializers.Serializer):
             'display_type': self.display_type,
             'method': self.method,
             'element': models_to_serializers[self.instance.__class__.__name__]['element'],
-            'svg': self.instance.svg(display_type=self.display_type, method=self.method,).as_svg(),
+            'svg': self.svg()
             # 'fullmeta': self.load_meta()
         }
 

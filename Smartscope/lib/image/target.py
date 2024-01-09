@@ -81,7 +81,7 @@ class Target:
 
         # if shape_type == 'hole':
 
-        self.radius = min(len1, len2) / 2
+        self.radius = int(min(len1, len2) / 2)
             # self.area = np.pi * (self.radius ** 2)
 
     def set_stage_coords(self, x,y,z):

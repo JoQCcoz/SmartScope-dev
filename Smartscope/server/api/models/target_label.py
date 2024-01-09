@@ -22,6 +22,15 @@ class TargetLabel(BaseModel):
         abstract = True
         app_label = 'API'
 
+    def save(self, *args, **kwargs):
+        obj = self.__class__.objects.filter(content_type=self.content_type, object_id=self.object_id, method_name=self.method_name).first()
+        if obj is not None:
+            self.pk = obj.pk
+        super().save(*args, **kwargs)
+    
+    def update(self, *args, **kwargs):
+        super().update(*args, **kwargs)
+
 
 class Finder(TargetLabel):
     x = models.IntegerField()

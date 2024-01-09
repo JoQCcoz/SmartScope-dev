@@ -1,4 +1,5 @@
 from pathlib import Path
+from .settings import worker
 
 class MicroscopeBusyError(Exception):
 
@@ -12,14 +13,27 @@ class MicroscopeBusyError(Exception):
         Exiting.
         """
         return super().__init__(self.message)
+    
 
-def check_scope_locked(file:Path) -> None:
+def get_scope_locked_file(file) -> Path:
+    return Path(worker.TEMPDIR, file)
+
+def check_scope_locked(file) -> None:
+    file = get_scope_locked_file(file)
     if not file.exists():
         return 
     raise MicroscopeBusyError(file, file.read_text())
 
+def remove_scope_lock_file(file) -> None:
+    file = get_scope_locked_file(file)
+    if not file.exists():
+        raise FileNotFoundError(f'Lock file {file} not found.')   
+    file.unlink()
+    
+
 def write_session_lock(session_id:str, lockFile:Path) -> None:
-    with open(lockFile, 'w') as f:
+
+    with open(get_scope_locked_file(lockFile), 'w') as f:
         f.write(session_id)
 
 def check_stop_file(stop_file:Path) -> None:

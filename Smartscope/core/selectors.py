@@ -8,6 +8,7 @@ import cv2
 
 from smartscope_connector.models.target_label import Selector
 from Smartscope.lib.image.montage import Montage
+from .grid.run_io import get_file_and_process, load_montage
 from Smartscope.core.settings.worker import PLUGINS_FACTORY
 from Smartscope.lib.image_manipulations import save_image, to_8bits, auto_contrast
 
@@ -38,15 +39,17 @@ def cluster_by_field(parent, field='area', method_name='cluster_by_field',**kwar
 def gray_level_selector(parent,montage:Montage, save=True,method_name='gray_level_selector', **kwargs): 
     logger.debug(f'Initial targets = {len(parent.targets)}')
     if montage is None:
-        montage = Montage(**parent.__dict__, working_dir=parent.grid_id.directory)
-        montage.create_dirs()
+        montage = load_montage(parent.name)
+        # montage = Montage(**parent.__dict__, working_dir=parent.grid_id.directory)
+        # montage.create_dirs()
     # if save:
     #     img = cv2.bilateralFilter(auto_contrast(montage.image.copy()), 30, 75, 75)
     for ind,target in enumerate(parent.targets):
-        finder = list(target.finders.all())[0]
+        print(f'Processing target {target}')
+        finder = target.finders[0]
         x, y = finder.x, finder.y
-        median = np.mean(montage.image[y - target.radius:y + target.radius, x - target.radius:x + target.radius])
-        parent.targets[ind].selectors.append.append(Selector(value=median, method_name=method_name))
+        mean = np.mean(montage.image[y - target.radius:y + target.radius, x - target.radius:x + target.radius])
+        parent.targets[ind].selectors.append(Selector(value=round(mean), method_name=method_name))
         # if save:
         #     cv2.circle(img, (x, y), target.radius, target.median, 10)
 
@@ -57,7 +60,7 @@ def gray_level_selector(parent,montage:Montage, save=True,method_name='gray_leve
 
 
 def selector_wrapper(selectors, selection, *args, **kwargs):
-    logger.info(f'Running selectors {selectors} on {selection}')
+    logger.info(f'Running the following selectors: {selectors}')
     for method in selectors:
         method = PLUGINS_FACTORY[method]
         outputs = method.run(selection, method_name=method.name, *args, **kwargs)

@@ -15,11 +15,12 @@ from .grid.finders import find_targets
 from .grid.grid_io import GridIO
 from .grid.run_atlas import RunAtlas
 from .grid.run_io import get_file_and_process, load_montage
-# from .grid.run_square import RunSquare
+from .grid.run_square import RunSquare
 # from .grid.run_hole import RunHole
 
 from .interfaces.microscope_interface import MicroscopeInterface
 from smartscope_connector.api_interface import rest_api_interface as restAPI
+from smartscope_connector.Datatypes.querylist import QueryList
 
 from Smartscope.core.selectors import selector_wrapper
 
@@ -27,7 +28,7 @@ from Smartscope.core.selectors import selector_wrapper
 from Smartscope.core.settings import worker
 from Smartscope.core.status import status
 from Smartscope.core.protocols import load_protocol
-from Smartscope.core.data_manipulations import add_targets
+from Smartscope.core.data_manipulations import add_targets, select_n_areas
 # from Smartscope.core.preprocessing_pipelines import load_preprocessing_pipeline
 # from Smartscope.core.db_manipulations import select_n_areas, queue_atlas, add_targets
 
@@ -64,7 +65,7 @@ def run_grid(
     if grid.status is GridStatus.NULL:
         grid = restAPI.update(grid, status=GridStatus.STARTED, start_time=datetime.now())
 
-    working_directory = GridIO.create_grid_directories(Path(session.working_dir,grid.directory))
+    working_directory = GridIO.create_grid_directories(Path(session.directory,grid.directory))
     os.chdir(working_directory)
     logger.info(f"created and the entered into Grid directory={working_directory}")
     
@@ -121,7 +122,7 @@ def run_grid(
             montage,
             protocol.atlas.targets.finders
         )
-        atlas.targets = add_targets(
+        targets = add_targets(
             targets=targets,
             model=models.SquareModel,
             finder=finder_method,
@@ -130,21 +131,25 @@ def run_grid(
             grid_id=atlas.grid_id
         )
         logger.debug(f'Added {len(targets)} squares to atlas.')
-        logger.debug(targets[0])
-        atlas.targets = restAPI.post_many(instances=atlas.targets, output_type=models.SquareModel, route_suffixes=['add_targets'])
+        targets = restAPI.post_many(instances=targets, output_type=models.SquareModel, route_suffixes=['add_targets'])
+        logger.debug(f'Atlas has {len(atlas.targets)} targets')
         atlas = restAPI.update(atlas,
             status=status.TARGETS_PICKED)
+        atlas.targets = targets
 
     if atlas.status == status.TARGETS_PICKED:
         logger.debug(f'Atlas has {len(atlas.targets)} targets')
         atlas = selector_wrapper(protocol.atlas.targets.selectors, atlas, n_groups=5)
-        logger.debug(atlas.targets[0].selectors)  
-        # select_n_areas(atlas, grid.params_id.squares_num)
-        # atlas = restAPI.update(atlas, status=status.COMPLETED)
-    return
+        logger.debug(atlas.targets[0].selectors)
+        outputs = restAPI.post_many(instances=QueryList(atlas.targets), output_type=models.SquareModel, route_suffixes=['add_targets'], label_types='selectors')
+        logger.debug(outputs)
+        selection = select_n_areas(atlas, params.squares_num)
+        logger.debug(selection)
+        selection = QueryList(selection)
+        restAPI.update_many(instances=selection, selected=True, status=status.QUEUED)
+        atlas = restAPI.update(atlas, status=status.COMPLETED)
 
     logger.info('Atlas analysis is complete')
-    return
     running = True
     is_done = False
     while running:
@@ -152,10 +157,10 @@ def run_grid(
         grid = restAPI.update(grid, refresh_from_db=True, last_update=None)
         params = grid.params_id
         if grid.status == GridStatus.ABORTING:
-            preprocessing.stop(grid)
+            # preprocessing.stop(grid)
             break
         else:
-            square, hole = get_queue(grid)
+            square, hole = restAPI.get_multiple(instance=grid,output_types=[models.SquareModel,models.HoleModel],route_suffix='get_queue').values()
 
         logger.info(f'Queued => Square: {square}, Hole: {hole}')
         logger.info(f'Targets done: {is_done}')
@@ -210,7 +215,7 @@ def run_grid(
             logger.info(f'Running Square {square}')
             # process square
             if square.status in [status.QUEUED, status.STARTED]:
-                square = restAPI.update(square, status=status.STARTED)
+                square = restAPI.update(square, status=status.STARTED, route_suffix='detailed')
                 logger.info('Waiting on square file')
                 runAcquisition(
                     scope,
@@ -218,8 +223,8 @@ def run_grid(
                     params,
                     square
                 )
-                square = restAPI.update(square, status=status.ACQUIRED, completion_time=datetime.now())
-                RunSquare.process_square_image(square, grid, microscope)
+                square = restAPI.update(square, status=status.ACQUIRED, completion_time=datetime.now(), route_suffix='detailed')
+            RunSquare.process_square_image(square, grid, microscope)
         elif is_done:
             microscope_id = session.microscope_id.pk
             tmp_file = os.path.join(worker.TEMPDIR, f'.pause_{microscope_id}')
@@ -249,15 +254,14 @@ def run_grid(
         return 'finished'
 
 
-
-def get_queue(grid):
-    square = grid.squaremodel_set.filter(selected=True).\
-        exclude(status__in=[status.SKIPPED, status.COMPLETED]).\
-        order_by('number').first()
-    hole = grid.holemodel_set.filter(selected=True, square_id__status=status.COMPLETED).\
-        exclude(status__in=[status.SKIPPED, status.COMPLETED]).\
-        order_by('square_id__completion_time', 'number').first()
-    return square, hole#[h for h in holes if not h.bisgroup_acquired]
+# def get_queue(grid):
+#     square = grid.squaremodel_set.filter(selected=True).\
+#         exclude(status__in=[status.SKIPPED, status.COMPLETED]).\
+#         order_by('number').first()
+#     hole = grid.holemodel_set.filter(selected=True, square_id__status=status.COMPLETED).\
+#         exclude(status__in=[status.SKIPPED, status.COMPLETED]).\
+#         order_by('square_id__completion_time', 'number').first()
+#     return square, hole
 
 
 
@@ -312,7 +316,8 @@ def runAcquisition(
         instance,
     ):
     for method in methods:
-        output = worker.PROTOCOL_COMMANDS_FACTORY[method](scope,params,instance)
+        method, content, args, kwargs = parse_method(method)
+        output = worker.PROTOCOL_COMMANDS_FACTORY[method](scope,params,instance, content, *args, **kwargs)
     return output
 
 

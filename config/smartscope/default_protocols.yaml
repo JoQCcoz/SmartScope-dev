@@ -1,8 +1,8 @@
 ##Use this file to design rules for how to automatically set default protocol for a grid.
 - conditions:
-    - [holeType.name, NegativeStain]
-    - [holeType.name, Lacey]
-    - [holeType.name, MultiA]
+    - [holetype_id.name, NegativeStain]
+    - [holetype_id.name, Lacey]
+    - [holetype_id.name, MultiA]
   mode: any
   protocol: NegativeStain
 - conditions:
@@ -11,7 +11,7 @@
   mode: any
   protocol: SPA
 - conditions:
-    - [holeType.hole_size, '!__None']
+    - [holetype_id.hole_size, '!__None']
     - [params_id.bis_max_distance, '!__0']
     - [params_id.tilt_angle, 0]
   mode: all

@@ -3,6 +3,7 @@ from math import cos, radians
 from random import random
 import numpy as np
 import logging
+from smartscope_connector.Datatypes.querylist import QueryList
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +47,14 @@ def realignToSquare(scope,params,instance, content:Dict, *args, **kwargs)  -> No
     """Realigns to the square using the Search magnification. 
     Mainly useful when the alignement between the Atlas and the Square is off.
     """
-    from Smartscope.core.db_manipulations import set_or_update_refined_finder
+    from Smartscope.core.data_manipulations import set_or_update_refined_finder
+    from smartscope_connector.api_interface import rest_api_interface as restAPI
+
     stageX, stageY, stageZ = scope.realign_to_square()
-    set_or_update_refined_finder(instance.square_id, stageX, stageY, stageZ)
+    instance = set_or_update_refined_finder(instance, stageX, stageY, stageZ)
+    # restAPI.update(instance, finders=instance.finders, route_suffix='detailed')
+    restAPI.post_many(instances=QueryList([instance]), output_type=type(instance), route_suffixes=['add_targets'], label_types='finders')
+    
     scope.moveStage(stageX,stageY,stageZ)   
 
 def square(scope,params,instance, content:Dict, *args, **kwargs)  -> None:
@@ -57,7 +63,8 @@ def square(scope,params,instance, content:Dict, *args, **kwargs)  -> None:
 
 def moveStage(scope,params,instance, content:Dict, *args, **kwargs)  -> None:
     """Moves the stage to the instance position"""
-    finder = instance.finders.first()
+    logger.debug(f'Moving stage for instance {instance}')
+    finder = instance.finders[0]
     stage_x, stage_y, stage_z = finder.stage_x, finder.stage_y, finder.stage_z
     scope.moveStage(stage_x,stage_y,stage_z)
 
@@ -65,7 +72,7 @@ def moveStageWithAtlasToSearchOffset(scope,params,instance, content:Dict, *args,
     """Moves the stage to the instance position with an offset"""
     offset_x = scope.atlas_settings.atlas_to_search_offset_x
     offset_y = scope.atlas_settings.atlas_to_search_offset_y
-    finder = instance.finders.first()
+    finder = QueryList(instance.finders).first()
     stage_x, stage_y, stage_z = finder.stage_x, finder.stage_y, finder.stage_z
     scope.moveStage(stage_x+offset_x,stage_y+offset_y,stage_z)
 
