@@ -91,10 +91,6 @@ class ScreeningSession(BaseModel):
         cwd = find_screening_session(root_directories(self),self.working_directory)
         cache.set(cache_key,cwd,timeout=10800)
         return cwd
-<<<<<<< HEAD
-=======
-    
->>>>>>> fix 0.9.2 merge and decouple restapi-connector
 
     @property
     def stop_file(self):
