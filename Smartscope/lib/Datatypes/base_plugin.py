@@ -175,21 +175,22 @@ class SelectorSorter:
         # classes, limits = self.classes(self._targets, n_classes=n_classes, limits=limits)
         colors = self.set_colors(self._n_classes)
         logger.debug(f'Colors are {colors}')
-        colored_classes = list(map(lambda x: (colors[x], x, 'Cluster'), self.classes))
+        colored_classes = list(map(lambda x: (colors[x], x, 'Cluster' ) if x != 0 else ((colors[x], '', 'Rejected')), self.classes))
         logger.debug(f'Colored classes are {colored_classes}')
         self._labels = colored_classes
         return colored_classes
-        
 
     def calculate_classes(self):
         # logger.debug(f'Getting classes from selector {self._selector.name}. Inputs {len(self._targets)} targets and {self._n_classes} with limits {self.limits}.')
         map_in_bounds = self.included_in_limits()
-        step = np.floor(np.diff(self.limits) / (self._n_classes -1))
+        step = np.floor(np.diff(self.limits) / (self._n_classes))
         
         # for value, in_bounds in zip(values, map_in_bounds):
         def get_class(value, in_bounds) -> int:
             if not in_bounds:
                 return 0
+            if value == self.limits[1]:
+                return self._n_classes
             return int(np.floor((value - self.limits[0]) / step) + 1)
         
         self._classes = list(map(get_class, self.values, map_in_bounds))

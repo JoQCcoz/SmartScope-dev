@@ -1,7 +1,6 @@
 '''
 '''
-from django.db import transaction
-from django.utils import timezone
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -81,8 +80,7 @@ class RunSquare:
                 logger.debug(holes)
                 holes = QueryList(holes)
                 restAPI.update_many(instances=holes, selected=True, status=status.QUEUED)
-            logger.info(f'Picking holes on {square}')
-
+            logger.info(f'Selecting holes on {square.name}')
             selection = select_n_areas(square, params.holes_per_square, is_bis=is_bis)
             logger.debug(selection)
             selection = QueryList(selection)
@@ -91,7 +89,7 @@ class RunSquare:
         if square.status == status.TARGETS_SELECTED:
             square = restAPI.update(square,
                 status=status.COMPLETED,
-                completion_time=timezone.now()
+                completion_time=datetime.now()
             )
         if square.status == status.COMPLETED:
             logger.info(f'Square {square.name} analysis is complete')
