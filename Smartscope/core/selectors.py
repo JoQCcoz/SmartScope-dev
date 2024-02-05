@@ -45,7 +45,7 @@ def gray_level_selector(parent,montage:Montage, save=True,method_name='gray_leve
     # if save:
     #     img = cv2.bilateralFilter(auto_contrast(montage.image.copy()), 30, 75, 75)
     for ind,target in enumerate(parent.targets):
-        print(f'Processing target {target}')
+        # print(f'Processing target {target}')
         finder = target.finders[0]
         x, y = finder.x, finder.y
         mean = np.mean(montage.image[y - target.radius:y + target.radius, x - target.radius:x + target.radius])
