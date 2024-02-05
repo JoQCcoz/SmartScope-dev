@@ -8,7 +8,7 @@ from .jeolserialem_interface import JEOLSerialemInterface, JEOLadditionalSetting
 logger = logging.getLogger(__name__)
 
 def select_microscope_interface(microscope):
-    additional_settings_file = SMARTSCOPE_CUSTOM_CONFIG / f'{microscope.microscope_id}.yaml'
+    additional_settings_file = SMARTSCOPE_CUSTOM_CONFIG / f'{microscope.uid}.yaml'
     additional_settings = dict()
     logger.debug(f'Additional settings file: {additional_settings_file}')
     if additional_settings_file.exists():
