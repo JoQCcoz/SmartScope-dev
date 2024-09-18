@@ -40,19 +40,33 @@ def get_target_methods(targets, method_type:['selectors','finders','classifiers'
 
     return set().union(*map(get_selector_methods_names, targets))
 
+def granular_filter_choice(filtered_set_item: str, choice:str) -> bool:
+    filtered_set_item = filtered_set_item.split("_")
+    choice_split = choice.split("_")
+    for set_item, split in zip(filtered_set_item,choice_split):
+        if set_item == split:
+            return False
+    return True
 
 def randomized_choice(filtered_set: set, n: int):
-    choices = []
+    init_choices = []
     while n >= len(filtered_set):
-        choices += list(filtered_set)
+        init_choices += list(filtered_set)
         n -= len(filtered_set)
-        logger.debug(f'More choices than length of filtered set, choosing one of each {choices}. {n} left to randomly choose from.')
+        logger.debug(f'More choices than length of filtered set, choosing one of each {init_choices}. {n} left to randomly choose from.')
+    remainder_set = filtered_set.copy()
+    choices = []
     for i in range(n):
-        choice = random.choice(list(filtered_set))
-        logger.debug(f'For {i}th choice, choosing {choice} from {filtered_set}.')
+        if remainder_set == set():
+            remainder_set = filtered_set.difference(set(choices))
+            logger.debug(f'No more choices left to choose from. Resetting remainder set to {filtered_set} - {choices} = {remainder_set}.')
+        choice = random.choice(list(remainder_set))
+        logger.debug(f'For {i}th choice, choosing {choice} from {remainder_set}.')
         choices.append(choice)
-        filtered_set.remove(choice)
-    return choices
+        remainder_set.remove(choice)
+        remainder_set = set(filter(lambda x: granular_filter_choice(x, choice), remainder_set))
+
+    return choices + init_choices
 
 def choose_get_index(lst, value):
     indices = [i for i, x in enumerate(lst) if x == value]

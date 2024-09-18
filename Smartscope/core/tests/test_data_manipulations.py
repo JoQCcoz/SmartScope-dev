@@ -48,7 +48,7 @@ def test_prepare_filtered_set():
     assert len(filtered_set) == 2
 
 def test_randomized_choice():
-    filtered_set = {1,2,3,4,5}
+    filtered_set = {'0_12','1_','10_2','00_0','13_4','13_0','4_0'}
     choices = randomized_choice(filtered_set.copy(), 3)
     assert len(choices) == 3
     assert len(set(choices)) == len(choices)
